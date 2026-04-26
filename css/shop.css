@@ -1,0 +1,419 @@
+/* =============================================
+   shop.css — החנות: Hero + רשת מוצרים
+   ============================================= */
+
+/* =============================================
+   HERO — navy panel
+   ============================================= */
+.hero {
+  background: var(--navy);
+  color: var(--text-on-dark);
+  padding: 6rem 2rem 5rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* subtle gold radial glow */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 60%, rgba(201,168,76,0.08) 0%, transparent 55%),
+    radial-gradient(ellipse at 70% 25%, rgba(201,168,76,0.06) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* thin gold bottom border */
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold), transparent);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* -- לוגו גדול -- */
+.hero-logo {
+  font-family: 'Cormorant Garamond', 'Playfair Display', serif;
+  font-size: 5.5rem;
+  font-weight: 700;
+  letter-spacing: 6px;
+  line-height: 1;
+  margin-bottom: 0.75rem;
+  color: var(--warm-white);
+}
+
+.oo-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  vertical-align: middle;
+  margin-right: 6px; /* matches hero-logo letter-spacing */
+}
+
+/* cookie photo in big hero logo */
+.choc-dot {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: url('../images/cookie-logo.png') center/cover no-repeat;
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+/* -- ribbon → now a slim gold-bordered badge -- */
+.hero-ribbon {
+  display: inline-block;
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  border-top: 1px solid var(--gold-border);
+  border-bottom: 1px solid var(--gold-border);
+  padding: 5px 20px;
+  margin-bottom: 1.75rem;
+}
+
+/* remove old ribbon triangle pseudo-elements */
+.hero-ribbon::before,
+.hero-ribbon::after {
+  display: none;
+}
+
+.hero p {
+  color: var(--text-dim);
+  font-size: 1rem;
+  margin-bottom: 2.25rem;
+  font-weight: 300;
+  line-height: 1.7;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* -- hero tags -- */
+.hero-tags {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 2.5rem;
+}
+
+.tag {
+  padding: 4px 16px;
+  border: 1px solid var(--gold-border);
+  border-radius: 0;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+/* =============================================
+   PRODUCTS SECTION
+   ============================================= */
+.products-section {
+  padding: 4rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.section-header h2 {
+  font-size: 2rem;
+  color: var(--navy);
+  white-space: nowrap;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+/* thin gold line */
+.section-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to left, transparent, var(--gold-border));
+}
+
+/* -- כפתורי פילטר -- */
+.filter-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-tab {
+  padding: 6px 22px;
+  border-radius: 0;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-family: 'Heebo', sans-serif;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.filter-tab.active {
+  background: var(--navy);
+  color: var(--gold-light);
+  border-color: var(--navy);
+}
+
+.filter-tab:hover:not(.active) {
+  border-color: var(--gold);
+  color: var(--text-main);
+}
+
+/* -- רשת מוצרים -- */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+/* =============================================
+   PRODUCT CARD
+   ============================================= */
+.product-card {
+  background: var(--warm-white);
+  border-radius: 0;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--gold);
+}
+
+/* image / emoji area */
+.product-img {
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  background: var(--ivory);
+  position: relative;
+  border-bottom: 1px solid var(--border);
+}
+
+.product-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.product-info {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* badge row */
+.product-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.product-badge {
+  font-size: 0.65rem;
+  padding: 2px 10px;
+  border-radius: 0;
+  font-weight: 500;
+  display: inline-block;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.badge-cookie {
+  background: var(--gold-dim);
+  color: var(--gold);
+  border: 1px solid var(--gold-border);
+}
+
+.badge-muffin {
+  background: rgba(61,122,92,0.08);
+  color: var(--sage);
+  border: 1px solid rgba(61,122,92,0.25);
+}
+
+.badge-bundle {
+  background: rgba(91,33,182,0.07);
+  color: #5B21B6;
+  border: 1px solid rgba(91,33,182,0.22);
+}
+
+.product-name {
+  font-family: 'Cormorant Garamond', 'Playfair Display', serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: var(--navy);
+  letter-spacing: 0.3px;
+}
+
+.product-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.product-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+.product-price {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--gold);
+  font-family: 'Cormorant Garamond', 'Playfair Display', serif;
+  letter-spacing: 0.5px;
+}
+
+/* + add button */
+.add-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 0;
+  background: var(--navy);
+  color: var(--gold);
+  border: 1px solid var(--gold-border);
+  cursor: pointer;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.add-btn:hover {
+  background: var(--gold);
+  color: var(--navy);
+  border-color: var(--gold);
+}
+
+.add-btn:active {
+  transform: scale(0.95);
+}
+
+/* =============================================
+   CARD QUANTITY CONTROL
+   ============================================= */
+.card-qty-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid var(--gold-border);
+}
+
+.card-qty-btn {
+  width: 30px;
+  height: 30px;
+  background: var(--navy);
+  color: var(--gold);
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  font-family: 'Heebo', sans-serif;
+  line-height: 1;
+}
+
+.card-qty-btn:hover {
+  background: var(--gold);
+  color: var(--navy);
+}
+
+.card-qty-btn:active {
+  transform: scale(0.92);
+}
+
+.card-qty-input {
+  width: 40px;
+  height: 30px;
+  text-align: center;
+  border: none;
+  border-right: 1px solid var(--gold-border);
+  border-left: 1px solid var(--gold-border);
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: 'Heebo', sans-serif;
+  color: var(--navy);
+  background: #fff;
+  padding: 0;
+  outline: none;
+  direction: ltr;
+}
+
+/* הסתרת חיצי ה-spinner */
+.card-qty-input::-webkit-inner-spin-button,
+.card-qty-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.card-qty-input[type=number] { -moz-appearance: textfield; }
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+@media (max-width: 600px) {
+  .hero {
+    padding: 4rem 1.25rem 3.5rem;
+  }
+
+  .hero-logo {
+    font-size: 3.5rem;
+    letter-spacing: 3px;
+  }
+
+  .choc-dot {
+    width: 32px;
+    height: 32px;
+    font-size: 0.7rem;
+  }
+
+  .products-section {
+    padding: 2.5rem 1rem;
+  }
+
+  .product-img {
+    height: 150px;
+  }
+}

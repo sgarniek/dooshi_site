@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dooshi — איפוס סיסמה</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/base.css" />
+  <style>
+    body {
+      min-height: 100vh;
+      background: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .reset-card {
+      background: var(--warm-white);
+      border: 1px solid var(--gold-border);
+      border-radius: var(--radius);
+      padding: 2.75rem 2.5rem;
+      width: 100%;
+      max-width: 380px;
+    }
+    .reset-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: var(--navy);
+      text-align: center;
+      margin-bottom: 0.2rem;
+    }
+    .reset-tagline {
+      font-size: 0.65rem;
+      color: var(--gold);
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      text-align: center;
+      border-top: 1px solid var(--gold-border);
+      border-bottom: 1px solid var(--gold-border);
+      padding: 4px 0;
+      margin-bottom: 2rem;
+    }
+    .reset-card h2 {
+      font-size: 1.1rem;
+      color: var(--navy);
+      margin-bottom: 1.25rem;
+      font-weight: 600;
+    }
+    .reset-msg {
+      border-radius: var(--radius);
+      padding: 9px 14px;
+      font-size: 0.82rem;
+      margin-bottom: 1rem;
+      display: none;
+      line-height: 1.5;
+    }
+    .reset-msg.error   { background: var(--rose-light); color: var(--rose); border: 1px solid var(--rose); }
+    .reset-msg.success { background: var(--sage-light);  color: var(--sage); border: 1px solid var(--sage); }
+    .form-group { margin-bottom: 1.1rem; }
+    .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-bottom: 5px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .form-group input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 13px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: 'Heebo', sans-serif;
+      font-size: 0.9rem;
+      background: var(--warm-white);
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      direction: ltr;
+    }
+    .form-group input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="reset-card" id="resetCard">
+    <div class="reset-logo">Dooshi</div>
+    <div class="reset-tagline">Admin Panel</div>
+
+    <h2>הגדרת סיסמה חדשה</h2>
+
+    <div id="resetMsg" class="reset-msg"></div>
+
+    <div class="form-group">
+      <label>סיסמה חדשה</label>
+      <input type="password" id="newPassword" placeholder="לפחות 8 תווים"
+             onkeydown="if(event.key==='Enter') doReset()" />
+    </div>
+    <div class="form-group">
+      <label>אימות סיסמה</label>
+      <input type="password" id="confirmPassword" placeholder="חזרה על הסיסמה"
+             onkeydown="if(event.key==='Enter') doReset()" />
+    </div>
+
+    <button id="resetBtn"
+            onclick="doReset()"
+            style="width:100%; padding:11px; font-family:'Heebo',sans-serif; font-size:0.9rem;
+                   font-weight:600; background:var(--navy); color:var(--gold); border:1px solid var(--gold-border);
+                   border-radius:var(--radius); cursor:pointer; margin-top:0.5rem; transition:all 0.2s;">
+      עדכון סיסמה
+    </button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/data.js"></script>
+  <script>
+    const token = new URLSearchParams(location.search).get('token');
+
+    // Validate token on load
+    (async () => {
+      if (!token) { showMsg('קישור לא תקין', 'error'); disableForm(); return; }
+
+      const now = new Date().toISOString();
+      const { data } = await db.from('admins')
+        .select('id')
+        .eq('reset_token', token)
+        .gt('reset_token_expires', now)
+        .single();
+
+      if (!data) { showMsg('הקישור פג תוקף או אינו תקין. בקשו קישור חדש.', 'error'); disableForm(); }
+    })();
+
+    function showMsg(text, type) {
+      const el = document.getElementById('resetMsg');
+      el.textContent    = text;
+      el.className      = 'reset-msg ' + type;
+      el.style.display  = 'block';
+    }
+
+    function disableForm() {
+      document.getElementById('newPassword').disabled    = true;
+      document.getElementById('confirmPassword').disabled = true;
+      document.getElementById('resetBtn').disabled        = true;
+    }
+
+    async function hashPassword(password, salt) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password + salt);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+    }
+
+    function generateSalt() {
+      const arr = new Uint8Array(16);
+      crypto.getRandomValues(arr);
+      return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function doReset() {
+      const password = document.getElementById('newPassword').value;
+      const confirm  = document.getElementById('confirmPassword').value;
+      const btn      = document.getElementById('resetBtn');
+
+      if (password.length < 8)      { showMsg('הסיסמה חייבת להכיל לפחות 8 תווים', 'error'); return; }
+      if (password !== confirm)      { showMsg('הסיסמאות אינן תואמות', 'error'); return; }
+
+      btn.textContent = '...';
+      btn.disabled    = true;
+
+      const now = new Date().toISOString();
+      const { data: admin } = await db.from('admins')
+        .select('id')
+        .eq('reset_token', token)
+        .gt('reset_token_expires', now)
+        .single();
+
+      if (!admin) {
+        showMsg('הקישור פג תוקף. בקשו קישור חדש.', 'error');
+        disableForm();
+        return;
+      }
+
+      const salt = generateSalt();
+      const hash = await hashPassword(password, salt);
+
+      await db.from('admins').update({
+        password_hash:        hash,
+        salt:                 salt,
+        reset_token:          null,
+        reset_token_expires:  null,
+      }).eq('id', admin.id);
+
+      showMsg('הסיסמה עודכנה בהצלחה! מיד תועברו לדף הכניסה...', 'success');
+      disableForm();
+      setTimeout(() => { location.href = '/admin/'; }, 2500);
+    }
+  </script>
+</body>
+</html>

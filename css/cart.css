@@ -1,0 +1,234 @@
+/* =============================================
+   cart.css — עגלת קניות (drawer מהצד)
+   ============================================= */
+
+/* -- תג מספר פריטים בכפתור העגלה -- */
+.cart-badge {
+  background: var(--rose);
+  color: #fff;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 0.65rem;
+  display: none; /* מוסתר כשהעגלה ריקה */
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  margin-right: -4px;
+}
+
+/* -- רקע כהה שמכסה את הדף כשהעגלה פתוחה -- */
+.cart-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 200;
+}
+
+.cart-overlay.open {
+  display: block;
+}
+
+/* -- ה-Drawer עצמו (נשלף מהצד) -- */
+.cart-drawer {
+  position: fixed;
+  left: 0;      /* בעברית — נשלף מהצד השמאלי */
+  top: 0;
+  bottom: 0;
+  width: 400px;
+  max-width: 100vw;
+  background: var(--warm-white);
+  z-index: 201;
+  transform: translateX(-100%); /* מוסתר מחוץ למסך */
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 8px 0 32px rgba(30,15,7,0.15);
+}
+
+.cart-drawer.open {
+  transform: translateX(0); /* נכנס פנימה */
+}
+
+/* -- כותרת העגלה -- */
+.cart-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.cart-header h3 {
+  font-size: 1.2rem;
+}
+
+/* כפתור X לסגירה */
+.close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  transition: all 0.2s;
+}
+
+.close-btn:hover {
+  background: var(--caramel-light);
+  color: var(--brown-dark);
+}
+
+/* -- גוף העגלה (גלילה אנכית) -- */
+.cart-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+/* מסך ריק */
+.cart-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+}
+
+.cart-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+}
+
+/* -- פריט בעגלה -- */
+.cart-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+  background: #fff;
+}
+
+/* אמוג'י הפריט */
+.cart-item-emoji {
+  font-size: 1.8rem;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--caramel-light);
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.cart-item-info {
+  flex: 1;
+}
+
+.cart-item-name {
+  font-weight: 500;
+  font-size: 0.88rem;
+  color: var(--brown-dark);
+}
+
+.cart-item-price {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* -- בקרת כמות (+/-) -- */
+.cart-item-qty {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.qty-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: var(--brown-dark);
+  transition: all 0.15s;
+  font-family: 'Heebo', sans-serif;
+}
+
+.qty-btn:hover {
+  background: var(--caramel-light);
+}
+
+.qty-num {
+  font-weight: 700;
+  font-size: 0.9rem;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* -- תחתית העגלה (סיכום + כפתור הזמנה) -- */
+.cart-footer {
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.cart-total-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.cart-total-row span {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.order-phone-cta {
+  text-align: center;
+  padding: 0.9rem;
+  background: var(--navy);
+  border-radius: var(--radius);
+  margin-top: 0.25rem;
+}
+
+.order-phone-label {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.order-phone-number {
+  display: block;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 2px;
+  text-decoration: none;
+  direction: ltr;
+}
+.order-phone-number:hover { color: var(--gold-light); }
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+@media (max-width: 600px) {
+  .cart-drawer {
+    width: 100vw;
+  }
+}

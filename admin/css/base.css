@@ -1,0 +1,330 @@
+/* =============================================
+   base.css — משתנים גלובליים, איפוס, טיפוגרפיה
+   ============================================= */
+
+/* -- צבעים ומשתנים גלובליים -- */
+:root {
+  /* Navy */
+  --navy:           #0C1428;
+  --navy-mid:       #142038;
+  --navy-surface:   #1C2D50;
+
+  /* Gold */
+  --gold:           #C9A84C;
+  --gold-light:     #E8D4A0;
+  --gold-dim:       rgba(201,168,76,0.12);
+  --gold-border:    rgba(201,168,76,0.32);
+
+  /* Light surfaces */
+  --ivory:          #F7F5F0;
+  --warm-white:     #FDFCF8;
+  --cream:          #F7F5F0;
+
+  /* Text */
+  --text-main:      #1A1208;
+  --text-muted:     #7A6A50;
+  --text-on-dark:   rgba(252,250,244,0.88);
+  --text-dim:       rgba(252,250,244,0.50);
+
+  /* Legacy aliases — keep admin.css & components working */
+  --brown-dark:     #0C1428;
+  --brown-mid:      #C9A84C;
+  --brown-light:    #A09070;
+  --caramel:        #C9A84C;
+  --caramel-light:  rgba(201,168,76,0.10);
+  --choc:           #0C1428;
+  --border:         #E2D8C8;
+  --rose:           #B84040;
+  --rose-light:     #FAF0EE;
+  --sage:           #3D7A5C;
+  --sage-light:     #EEF5EF;
+  --red-banner:     #8B1A1A;
+
+  /* Layout */
+  --radius:         2px;
+  --radius-sm:      2px;
+  --shadow:         0 2px 20px rgba(12,20,40,0.10);
+  --shadow-hover:   0 12px 48px rgba(12,20,40,0.24);
+}
+
+/* -- איפוס בסיסי -- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Heebo', sans-serif;
+  background: var(--ivory);
+  color: var(--text-main);
+  min-height: 100vh;
+  direction: rtl;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Cormorant Garamond', 'Playfair Display', serif;
+}
+
+/* -- Views -- */
+.view {
+  display: none;
+}
+.view.active {
+  display: block;
+}
+
+/* =============================================
+   NAV — סרגל ניווט עליון
+   ============================================= */
+nav {
+  background: var(--navy);
+  border-bottom: 1px solid var(--gold-border);
+  padding: 0 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.logo-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-dooshi {
+  font-family: 'Cormorant Garamond', 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--warm-white);
+  letter-spacing: 2px;
+  line-height: 1;
+}
+
+.logo-oo {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  vertical-align: middle;
+  margin-right: 2px; /* matches logo-dooshi letter-spacing */
+}
+
+/* cookie photo in nav logo */
+.logo-cookie {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: url('../images/cookie-logo.png') center/cover no-repeat;
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.logo-tagline {
+  font-size: 0.6rem;
+  color: var(--gold);
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border-top: 1px solid var(--gold-border);
+  padding-top: 3px;
+  margin-top: 3px;
+  text-align: center;
+  font-family: 'Heebo', sans-serif;
+}
+
+.nav-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* =============================================
+   BUTTONS
+   ============================================= */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 22px;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  text-decoration: none;
+  direction: rtl;
+  letter-spacing: 0.3px;
+}
+
+/* Ghost — default: dark text on light background */
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover {
+  background: var(--ivory);
+  border-color: var(--gold-border);
+  color: var(--text-main);
+}
+
+/* Ghost inside the nav (dark background) — gold */
+nav .btn-ghost {
+  color: var(--gold-light);
+  border-color: var(--gold-border);
+}
+nav .btn-ghost:hover {
+  background: var(--gold-dim);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* Primary — gold button */
+.btn-primary {
+  background: var(--gold);
+  color: var(--navy);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.btn-primary:hover {
+  background: var(--gold-light);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(201,168,76,0.35);
+}
+
+/* Caramel → maps to gold */
+.btn-caramel {
+  background: var(--gold);
+  color: var(--navy);
+  font-weight: 600;
+}
+.btn-caramel:hover {
+  background: var(--gold-light);
+  transform: translateY(-1px);
+}
+
+.btn-danger {
+  background: var(--rose);
+  color: #fff;
+}
+.btn-danger:hover { background: #943030; }
+
+.btn-success {
+  background: var(--sage);
+  color: #fff;
+}
+.btn-success:hover { background: #2d5e40; }
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+}
+
+.full-width {
+  width: 100%;
+  justify-content: center;
+  padding: 13px;
+  font-size: 1rem;
+}
+
+/* =============================================
+   TOAST
+   ============================================= */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--navy);
+  color: var(--gold-light);
+  border: 1px solid var(--gold-border);
+  padding: 10px 22px;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  z-index: 500;
+  transition: transform 0.3s;
+  white-space: nowrap;
+  pointer-events: none;
+  letter-spacing: 0.3px;
+}
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* =============================================
+   MODAL
+   ============================================= */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(8,14,28,0.72);
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal {
+  background: var(--warm-white);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 2.25rem;
+  max-width: 440px;
+  width: 90%;
+  box-shadow: 0 24px 64px rgba(12,20,40,0.35);
+}
+.modal h3 {
+  font-size: 1.3rem;
+  margin-bottom: 0.75rem;
+  color: var(--navy);
+}
+.modal p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 1.25rem;
+  line-height: 1.6;
+}
+
+.modal-sms-preview {
+  background: var(--navy);
+  color: var(--text-on-dark);
+  border-radius: var(--radius);
+  padding: 1rem;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  margin-bottom: 1.25rem;
+  direction: rtl;
+  white-space: pre-line;
+  border: 1px solid var(--gold-border);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+@media (max-width: 600px) {
+  nav { padding: 0 1rem; }
+  .logo-dooshi { font-size: 1.6rem; }
+}

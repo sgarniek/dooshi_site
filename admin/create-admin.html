@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>יצירת חשבון מנהל</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 480px; margin: 60px auto; padding: 0 20px; direction: rtl; }
+    h2   { margin-bottom: 6px; }
+    p    { color: #666; font-size: 0.9rem; margin-bottom: 24px; }
+    label { display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 4px; margin-top: 14px; }
+    input {
+      width: 100%; box-sizing: border-box; padding: 9px 12px;
+      border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem;
+    }
+    button {
+      margin-top: 20px; width: 100%; padding: 11px;
+      background: #0C1428; color: #C9A84C; border: none;
+      border-radius: 4px; font-size: 1rem; cursor: pointer;
+    }
+    button:hover { background: #1a2540; }
+    #result { display: none; margin-top: 24px; }
+    #result h3 { margin-bottom: 8px; }
+    #result p  { color: #333; margin-bottom: 8px; }
+    textarea {
+      width: 100%; box-sizing: border-box; padding: 10px;
+      font-family: monospace; font-size: 0.85rem; direction: ltr;
+      border: 1px solid #ccc; border-radius: 4px; background: #f5f5f5;
+      resize: vertical;
+    }
+    .copy-btn {
+      margin-top: 8px; padding: 7px 16px; background: #fff;
+      border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-size: 0.85rem;
+    }
+    .copy-btn:hover { background: #f0f0f0; }
+    .note { font-size: 0.8rem; color: #888; margin-top: 16px; }
+  </style>
+</head>
+<body>
+
+  <h2>יצירת חשבון מנהל</h2>
+  <p>מלאו את הפרטים — הדף יצור עבורכם את פקודת ה-SQL להרצה ב-Supabase.</p>
+
+  <label>מייל</label>
+  <input type="email" id="email" placeholder="admin@dooshi.co.il" />
+
+  <label>סיסמה</label>
+  <input type="password" id="password" placeholder="לפחות 8 תווים" />
+
+  <button onclick="generate()">צור SQL</button>
+
+  <div id="result">
+    <h3>הריצו את ה-SQL הבא ב-Supabase:</h3>
+    <p>פתחו את <strong>Supabase → SQL Editor</strong> והדביקו:</p>
+    <textarea id="sqlOutput" rows="7" readonly></textarea>
+    <button class="copy-btn" onclick="copySQL()">העתק</button>
+    <p class="note">לאחר ביצוע ה-SQL, מחקו קובץ זה (create-admin.html) מהפרויקט.</p>
+  </div>
+
+  <script>
+    async function hashPassword(password, salt) {
+      const data = new TextEncoder().encode(password + salt);
+      const buf  = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+
+    async function generate() {
+      const email    = document.getElementById('email').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
+
+      if (!email)            { alert('נא למלא מייל'); return; }
+      if (password.length < 8) { alert('הסיסמה חייבת להכיל לפחות 8 תווים'); return; }
+
+      const salt = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+        .map(b => b.toString(16).padStart(2,'0')).join('');
+      const hash = await hashPassword(password, salt);
+
+      const sql = `INSERT INTO admins (email, password_hash, salt)\nVALUES ('${email}', '${hash}', '${salt}');`;
+      document.getElementById('sqlOutput').value = sql;
+      document.getElementById('result').style.display = 'block';
+    }
+
+    function copySQL() {
+      navigator.clipboard.writeText(document.getElementById('sqlOutput').value)
+        .then(() => alert('הועתק!'));
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dooshi – עוגיות ומאפינס</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍪</text></svg>" />
+
+  <!-- גופנים מ-Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet" />
+
+  <!-- קבצי עיצוב -->
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/shop.css" />
+  <link rel="stylesheet" href="css/cart.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body>
+
+  <!-- ════════════════════════════════════════
+       NAV — סרגל ניווט עליון
+       מכיל: לוגו + כפתורי עגלה וניהול
+  ════════════════════════════════════════ -->
+  <nav>
+    <div class="nav-logo" onclick="showView('shop')">
+      <div class="logo-wrap">
+        <div class="logo-dooshi">
+          D<span class="logo-oo">
+            <span class="logo-cookie"></span>
+            <span class="logo-cookie"></span>
+          </span>shi
+        </div>
+        <div class="logo-tagline">Homemade in Tel Aviv</div>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-ghost btn-sm" id="navUserBtn" onclick="openAuthModal('login')">כניסה / הרשמה</button>
+      <button class="btn btn-ghost" onclick="toggleCart()">
+        🛒 עגלה
+        <span class="cart-badge" id="cartBadge">0</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ════════════════════════════════════════
+       VIEW: SHOP — דף החנות הראשי
+  ════════════════════════════════════════ -->
+  <div class="view active" id="view-shop">
+    <div class="hero">
+      <div class="hero-content">
+        <div class="hero-logo">
+          D<span class="oo-wrap">
+            <span class="choc-dot"></span>
+            <span class="choc-dot"></span>
+          </span>shi
+        </div>
+        <div class="hero-ribbon">Homemade in Tel Aviv</div>
+        <p>עוגיות ומאפינס אפויים טרי בכל שבוע — עם אהבה, מהבית שלנו לשלכם</p>
+        <div class="hero-tags">
+          <span class="tag">🍪 עוגיות</span>
+          <span class="tag">🧁 מאפינס</span>
+          <span class="tag">✨ אפייה ביתית</span>
+          <span class="tag">🚗 איסוף עצמי</span>
+        </div>
+        <button class="btn btn-caramel" onclick="document.getElementById('products-anchor').scrollIntoView({behavior:'smooth'})">
+          לכל המוצרים ↓
+        </button>
+      </div>
+    </div>
+
+    <div class="products-section" id="products-anchor">
+      <div class="section-header">
+        <h2>המוצרים שלנו</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="filterProducts('all', this)">הכל</button>
+        <button class="filter-tab" onclick="filterProducts('cookie', this)">עוגיות</button>
+        <button class="filter-tab" onclick="filterProducts('muffin', this)">מאפינס</button>
+        <button class="filter-tab" onclick="filterProducts('bundle', this)">מארזים</button>
+      </div>
+      <!-- הגריד מתמלא דינמית מ-JS -->
+      <div class="products-grid" id="productsGrid"></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       VIEW: ORDER — טופס סיום הזמנה
+  ════════════════════════════════════════ -->
+  <div class="view" id="view-order">
+    <div class="order-view">
+      <button class="btn btn-ghost btn-sm" onclick="leaveOrderForm()" style="margin-bottom:1.5rem">← חזרה</button>
+      <h2 id="orderFormTitle">סיום הזמנה</h2>
+      <p id="orderFormSubtitle">מלאו את הפרטים ונאשר את ההזמנה בהקדם</p>
+
+      <div class="order-summary-box">
+        <h4>סיכום הזמנה</h4>
+        <div id="orderSummaryLines"></div>
+        <div class="order-total-line">
+          <span>סה"כ</span>
+          <span id="orderSummaryTotal">₪0</span>
+        </div>
+      </div>
+
+      <div class="section-divider">מועד איסוף</div>
+      <div id="pickupCalendarWrap">
+        <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="nextCalendarMonth()">&#8592;</button>
+          <span id="calendarMonthLabel" class="cal-month-label"></span>
+          <button class="cal-nav-btn" onclick="prevCalendarMonth()">&#8594;</button>
+        </div>
+        <div id="calendarGrid"></div>
+        <div class="cal-legend">
+          <span class="cal-dot cal-dot-morning"></span> בוקר
+          <span class="cal-dot cal-dot-afternoon" style="margin-right:10px"></span> אחה"צ
+        </div>
+      </div>
+      <input type="hidden" id="fPickupDate" value="" />
+      <div id="fPickupTimeGroup" style="display:none; margin-top:1rem">
+        <label class="cal-time-label">שעת איסוף</label>
+        <div class="pickup-opts" id="fPickupTimeOpts"></div>
+        <input type="hidden" id="fPickupTime" value="" />
+      </div>
+
+      <div class="section-divider">פרטי איסוף</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>שם פרטי</label>
+          <input type="text" id="fName" placeholder="ישראל" />
+        </div>
+        <div class="form-group">
+          <label>שם משפחה</label>
+          <input type="text" id="fLast" placeholder="ישראלי" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>טלפון (לאישור ב-SMS)</label>
+        <input type="tel" id="fPhone" placeholder="05X-XXXXXXX" />
+      </div>
+      <div class="form-group">
+        <label>אמצעי תשלום באיסוף</label>
+        <div class="pickup-opts">
+          <div class="pickup-opt selected" onclick="selectPayment(this, 'cash')">💵 מזומן</div>
+          <div class="pickup-opt" onclick="selectPayment(this, 'bit')">📱 Bit</div>
+        </div>
+        <input type="hidden" id="fPayment" value="cash" />
+      </div>
+      <div class="form-group">
+        <label>הערות (אלרגיות, בקשות מיוחדות)</label>
+        <textarea id="fNotes" placeholder="לדוגמה: ללא אגוזים..."></textarea>
+      </div>
+      <div class="payment-note">💡 התשלום מתבצע באיסוף — מזומן או Bit</div>
+      <button class="btn btn-primary" style="width:100%; padding:12px; font-size:1rem; justify-content:center;" onclick="submitOrder()">
+        שליחת ההזמנה ✓
+      </button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       VIEW: SUCCESS — מסך אישור הזמנה
+  ════════════════════════════════════════ -->
+  <div class="view" id="view-success">
+    <div class="success-view">
+      <div class="success-icon">🎉</div>
+      <h2>ההזמנה התקבלה!</h2>
+      <div class="order-num" id="successOrderNum">#0001</div>
+      <p>תודה רבה! ניצור איתך קשר ב-SMS ברגע שההזמנה תאושר.<br />התשלום מתבצע באיסוף.</p>
+      <button class="btn btn-primary" onclick="showView('shop')">חזרה לחנות</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       VIEW: HISTORY — היסטוריית הזמנות
+  ════════════════════════════════════════ -->
+  <div class="view" id="view-history">
+    <div class="history-view">
+      <div class="history-header">
+        <button class="btn btn-ghost btn-sm" onclick="showView('shop')">← חזרה לחנות</button>
+        <h2>ההזמנות שלי</h2>
+        <button class="btn btn-ghost btn-sm" onclick="doLogout()">התנתק</button>
+      </div>
+      <div class="history-tabs">
+        <button class="history-tab active" data-tab="active"    onclick="switchHistoryTab('active', this)">פעילות</button>
+        <button class="history-tab"        data-tab="completed" onclick="switchHistoryTab('completed', this)">הושלמו</button>
+        <button class="history-tab"        data-tab="cancelled" onclick="switchHistoryTab('cancelled', this)">בוטלו</button>
+      </div>
+      <div id="historyList"></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       AUTH MODAL — כניסה / הרשמה
+  ════════════════════════════════════════ -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal auth-modal">
+
+      <button class="auth-close" onclick="closeAuthModal()">✕</button>
+
+      <!-- טאבים -->
+      <div class="auth-tabs">
+        <button class="auth-tab-btn active" data-tab="login"    onclick="switchAuthTab('login')">כניסה</button>
+        <button class="auth-tab-btn"        data-tab="register" onclick="switchAuthTab('register')">הרשמה</button>
+      </div>
+
+      <!-- כניסה -->
+      <div id="authLoginPanel">
+        <div class="form-group">
+          <label>מייל</label>
+          <input type="email" id="authLoginEmail" placeholder="you@example.com"
+                 onkeydown="if(event.key==='Enter') doAuthLogin()" />
+        </div>
+        <div class="form-group">
+          <label>סיסמה</label>
+          <input type="password" id="authLoginPassword" placeholder="••••••••"
+                 onkeydown="if(event.key==='Enter') doAuthLogin()" />
+        </div>
+        <div class="auth-msg" id="authLoginMsg"></div>
+        <button class="btn btn-primary" id="authLoginBtn"
+                style="width:100%; justify-content:center; padding:11px;"
+                onclick="doAuthLogin()">כניסה</button>
+        <button class="auth-link" onclick="switchAuthTab('forgot')">שכחתי סיסמה</button>
+      </div>
+
+      <!-- הרשמה -->
+      <div id="authRegPanel" style="display:none">
+        <div style="display:flex; gap:8px;">
+          <div class="form-group" style="flex:1">
+            <label>שם פרטי</label>
+            <input type="text" id="authRegFirst" placeholder="ישראל" />
+          </div>
+          <div class="form-group" style="flex:1">
+            <label>שם משפחה</label>
+            <input type="text" id="authRegLast" placeholder="ישראלי" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>טלפון</label>
+          <input type="tel" id="authRegPhone" placeholder="05X-XXXXXXX" />
+        </div>
+        <div class="form-group">
+          <label>כתובת <span style="font-size:0.7rem; color:var(--text-muted); text-transform:none; letter-spacing:0">(אופציונלי)</span></label>
+          <input type="text" id="authRegAddress1" placeholder="רחוב ומספר בית" />
+        </div>
+        <div style="display:flex; gap:8px;">
+          <div class="form-group" style="flex:1">
+            <label>דירה</label>
+            <input type="text" id="authRegApt" placeholder="דירה / כניסה" />
+          </div>
+          <div class="form-group" style="flex:1">
+            <label>מיקוד</label>
+            <input type="text" id="authRegZip" placeholder="1234567" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>עיר</label>
+          <input type="text" id="authRegCity" placeholder="תל אביב" />
+        </div>
+        <div class="form-group">
+          <label>מייל</label>
+          <input type="email" id="authRegEmail" placeholder="you@example.com" />
+        </div>
+        <div class="form-group">
+          <label>סיסמה</label>
+          <input type="password" id="authRegPassword" placeholder="••••••••" oninput="validateRegPassword()" />
+          <div id="passwordRules" style="margin-top:6px; font-size:0.75rem; line-height:1.9;">
+            <div id="rule-length" class="pwd-rule">✗ לפחות 8 תווים</div>
+            <div id="rule-letter" class="pwd-rule">✗ לפחות אות אחת</div>
+            <div id="rule-number" class="pwd-rule">✗ לפחות ספרה אחת</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>אישור סיסמה</label>
+          <input type="password" id="authRegPasswordConfirm" placeholder="••••••••"
+                 onkeydown="if(event.key==='Enter') doAuthRegister()" />
+        </div>
+        <div class="auth-msg" id="authRegMsg"></div>
+        <button class="btn btn-primary" id="authRegBtn"
+                style="width:100%; justify-content:center; padding:11px;"
+                onclick="doAuthRegister()">הרשמה</button>
+      </div>
+
+      <!-- שכחתי סיסמה -->
+      <div id="authForgotPanel" style="display:none">
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+          נשלח לך קישור לאיפוס הסיסמה
+        </p>
+        <div class="form-group">
+          <label>מייל</label>
+          <input type="email" id="authForgotEmail" placeholder="you@example.com"
+                 onkeydown="if(event.key==='Enter') doAuthForgot()" />
+        </div>
+        <div class="auth-msg" id="authForgotMsg"></div>
+        <button class="btn btn-primary" id="authForgotBtn"
+                style="width:100%; justify-content:center; padding:11px;"
+                onclick="doAuthForgot()">שלח קישור</button>
+        <button class="auth-link" onclick="switchAuthTab('login')">← חזרה לכניסה</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       CART DRAWER — עגלת קניות נשלפת
+  ════════════════════════════════════════ -->
+  <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+      <h3>🛒 העגלה שלי</h3>
+      <button class="close-btn" onclick="toggleCart()">✕</button>
+    </div>
+    <div class="cart-body" id="cartBody"></div>
+    <div class="cart-footer" id="cartFooter" style="display:none">
+      <div class="cart-total-row">
+        <span>סה"כ</span>
+        <span id="cartTotal">₪0</span>
+      </div>
+      <div class="payment-note">💡 תשלום באיסוף — מזומן או Bit</div>
+      <button class="btn btn-primary" style="width:100%; justify-content:center; padding:12px;" onclick="goToOrder()">
+        המשך להזמנה →
+      </button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       SMS MODAL — תצוגת הודעת SMS לפני שליחה
+  ════════════════════════════════════════ -->
+  <div class="modal-overlay" id="smsModal">
+    <div class="modal">
+      <h3 id="smsModalTitle">שליחת WhatsApp</h3>
+      <p id="smsModalDesc"></p>
+      <div class="modal-sms-preview" id="smsPreview"></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal()">ביטול</button>
+        <button class="btn btn-success" onclick="confirmWhatsApp()">💬 פתח WhatsApp</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Netlify Forms — רישום שדות (נסתר, לא מוצג למשתמש) -->
+  <form name="dooshi-order" data-netlify="true" hidden>
+    <input name="name" />
+    <input name="phone" />
+    <input name="payment" />
+    <input name="items" />
+    <input name="total" />
+    <input name="notes" />
+  </form>
+
+  <!-- הודעת Toast קצרה -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Supabase SDK — מסד נתונים ואימות -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- קבצי לוגיקה — סדר הטעינה חשוב -->
+  <script src="js/data.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/shop.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/order.js"></script>
+  <script src="js/main.js"></script>
+
+</body>
+</html>

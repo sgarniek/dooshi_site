@@ -1,0 +1,1135 @@
+/* =============================================
+   admin.css — לוח הניהול
+   ============================================= */
+
+.admin-view {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* -- כותרת עמוד הניהול -- */
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-header h2 {
+  font-size: 1.6rem;
+}
+
+.admin-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* -- כרטיסי סטטיסטיקה -- */
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--warm-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.stat-val {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--brown-dark);
+  font-family: 'Playfair Display', serif;
+}
+
+/* =============================================
+   ADMIN TABS — הזמנות / מוצרים
+   ============================================= */
+.admin-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid var(--border);
+}
+
+.admin-tab {
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px; /* מסתיר את הגבול התחתון של .admin-tabs */
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.admin-tab.active {
+  color: var(--brown-dark);
+  border-bottom-color: var(--caramel);
+  font-weight: 700;
+}
+
+/* תוכן הטאבים */
+.admin-tab-content {
+  display: none;
+}
+
+.admin-tab-content.active {
+  display: block;
+}
+
+/* =============================================
+   ORDERS TABLE — טבלת הזמנות
+   ============================================= */
+.orders-table-wrap {
+  overflow-x: auto; /* גלילה אופקית במסכים קטנים */
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.orders-table th {
+  text-align: right;
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--border);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.orders-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.orders-table tr:hover td {
+  background: var(--caramel-light);
+}
+
+/* -- תגי סטטוס -- */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* צבעי סטטוס */
+.status-new      { background: #FEF3C7; color: #92400E; }
+.status-approved { background: #DBEAFE; color: #1E40AF; }
+.status-ready    { background: #D1FAE5; color: #065F46; }
+.status-pickup    { background: #EDE9FE; color: #5B21B6; }
+.status-done      { background: #F3F4F6; color: #6B7280; }
+.status-cancelled { background: #FEE2E2; color: #991B1B; }
+
+/* -- דרופדאון סטטוס תשלום -- */
+.payment-status-select {
+  padding: 4px 8px;
+  border-radius: var(--radius);
+  border: 1px solid;
+  font-size: 0.78rem;
+  font-family: 'Heebo', sans-serif;
+  cursor: pointer;
+  font-weight: 500;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 8px center;
+  padding-left: 22px;
+}
+.payment-status-select.unpaid {
+  background-color: #FEF3C7;
+  color: #92400E;
+  border-color: #F59E0B;
+}
+.payment-status-select.paid {
+  background-color: #D1FAE5;
+  color: #065F46;
+  border-color: #34D399;
+}
+
+/* -- דרופדאון שינוי סטטוס -- */
+.status-change-select {
+  padding: 4px 8px;
+  border-radius: var(--radius);
+  border: 1px solid;
+  font-size: 0.78rem;
+  font-family: 'Heebo', sans-serif;
+  cursor: pointer;
+  font-weight: 500;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 8px center;
+  padding-left: 22px;
+}
+.status-change-select.status-new      { background-color: #FEF3C7; color: #92400E; border-color: #F59E0B; }
+.status-change-select.status-approved { background-color: #DBEAFE; color: #1E40AF; border-color: #93C5FD; }
+.status-change-select.status-ready    { background-color: #D1FAE5; color: #065F46; border-color: #34D399; }
+.status-change-select.status-pickup   { background-color: #EDE9FE; color: #5B21B6; border-color: #A78BFA; }
+.status-change-select.status-done     { background-color: #F3F4F6; color: #6B7280; border-color: #D1D5DB; }
+.status-change-select.status-cancelled{ background-color: #FEE2E2; color: #991B1B; border-color: #FCA5A5; }
+
+/* -- כפתורי פעולה בטבלה -- */
+.action-btns {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* אינדיקטור WhatsApp נשלח */
+.wa-sent-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  background: var(--sage-light);
+  color: var(--sage);
+  border: 1px solid rgba(61,122,92,0.25);
+  border-radius: var(--radius);
+  padding: 2px 7px;
+  margin-bottom: 3px;
+  white-space: nowrap;
+}
+
+/* הערת הזמנה מתחת לכפתורים */
+.admin-order-detail {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* רשימת פריטים בעמודת הפריטים */
+.order-items-list {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* =============================================
+   PRODUCTS ADMIN — ניהול מוצרים
+   ============================================= */
+.admin-products-hint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.products-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.product-admin-card {
+  background: var(--warm-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: opacity 0.2s;
+}
+
+.product-admin-inactive {
+  opacity: 0.45;
+}
+
+.product-admin-img {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--caramel-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-admin-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.product-admin-emoji {
+  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-admin-info {
+  flex: 1;
+}
+
+.product-admin-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.product-admin-price {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* -- Toggle Switch (מתג הפעלה/כיבוי) -- */
+.toggle-switch {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--border);
+  border-radius: 11px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+/* העיגול הלבן שזזה */
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  bottom: 3px;
+  right: 3px;
+  transition: 0.3s;
+}
+
+/* כשמופעל — צבע ירוק */
+.toggle-switch input:checked + .toggle-slider {
+  background: var(--sage);
+}
+
+/* כשמופעל — העיגול עובר לצד שמאל */
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(-18px);
+}
+
+/* =============================================
+   PRICING / PRODUCT SETTINGS
+   ============================================= */
+#pricingGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.pricing-card {
+  background: var(--warm-white);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.pricing-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--gold-border);
+}
+
+.pricing-emoji { font-size: 1.4rem; flex-shrink: 0; }
+
+.pricing-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.pricing-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pricing-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.pricing-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pricing-symbol {
+  font-size: 0.95rem;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.pricing-input {
+  width: 80px;
+  padding: 6px 8px;
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  font-family: 'Heebo', sans-serif;
+  font-weight: 600;
+  color: var(--navy);
+  text-align: center;
+  outline: none;
+  direction: ltr;
+}
+.pricing-input:focus { border-color: var(--gold); }
+.pricing-input::-webkit-inner-spin-button,
+.pricing-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.pricing-input[type=number] { -moz-appearance: textfield; }
+
+.pricing-textarea {
+  padding: 7px 10px;
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  font-family: 'Heebo', sans-serif;
+  color: var(--navy);
+  resize: vertical;
+  outline: none;
+  line-height: 1.5;
+}
+.pricing-textarea:focus { border-color: var(--gold); }
+
+.pricing-url {
+  padding: 6px 10px;
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+  font-family: 'Heebo', sans-serif;
+  color: var(--navy);
+  outline: none;
+  direction: ltr;
+}
+.pricing-url:focus { border-color: var(--gold); }
+
+.pricing-save-btn {
+  align-self: flex-end;
+  margin-top: 0.25rem;
+}
+
+/* bundle checkbox */
+.bundle-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--navy);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.bundle-toggle-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--gold);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* =============================================
+   EMOJI PICKER
+   ============================================= */
+.emoji-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px;
+  background: var(--ivory);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius);
+}
+
+.emoji-opt {
+  background: var(--warm-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 38px;
+  height: 38px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, background 0.15s;
+  line-height: 1;
+}
+.emoji-opt:hover { border-color: var(--gold); background: var(--gold-dim); }
+.emoji-opt.selected {
+  border-color: var(--gold);
+  background: var(--gold-dim);
+  box-shadow: 0 0 0 2px rgba(201,168,76,0.3);
+}
+
+/* =============================================
+   ADMIN ORDER SUB-TABS
+   ============================================= */
+.admin-order-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 1.25rem;
+}
+
+.admin-order-tab {
+  padding: 8px 18px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.admin-order-tab:hover { color: var(--navy); }
+
+.admin-order-tab.active {
+  color: var(--navy);
+  border-bottom-color: var(--gold);
+  font-weight: 600;
+}
+
+/* =============================================
+   ORDER FILTER BAR
+   ============================================= */
+.order-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 1.25rem;
+}
+
+.order-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 50px;
+  border: 1px solid var(--border);
+  background: var(--warm-white);
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.order-filter-chip:hover { border-color: var(--gold); color: var(--navy); }
+.order-filter-chip.active {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+}
+
+.order-filter-morning.active  { background: #F59E0B; border-color: #F59E0B; color: #fff; }
+.order-filter-afternoon.active { background: #6366F1; border-color: #6366F1; color: #fff; }
+.order-filter-morning:not(.active):hover  { border-color: #F59E0B; color: #92400E; }
+.order-filter-afternoon:not(.active):hover { border-color: #6366F1; color: #4338CA; }
+
+.filter-chip-count {
+  background: rgba(255,255,255,0.25);
+  border-radius: 50px;
+  padding: 0 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.order-filter-chip:not(.active) .filter-chip-count {
+  background: var(--gold-dim);
+  color: var(--text-muted);
+}
+
+/* מועד איסוף בטבלה */
+.pickup-date-cell { line-height: 1.5; }
+.pickup-date-val  { font-size: 0.8rem; color: var(--text-main); }
+.pickup-time-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 50px;
+  margin-top: 2px;
+}
+.pickup-time-morning   { background: #FEF3C7; color: #92400E; }
+.pickup-time-afternoon { background: #EDE9FE; color: #4338CA; }
+
+/* =============================================
+   ADMIN PICKUP CALENDAR  (apk- prefix, no shared classes)
+   ============================================= */
+.apk-wrap {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.apk-cal {
+  background: var(--warm-white);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem 1rem;
+  width: 300px;
+  flex-shrink: 0;
+}
+
+.apk-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.9rem;
+}
+
+.apk-month {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.apk-nav-btn {
+  background: var(--ivory);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  transition: border-color 0.15s, color 0.15s;
+}
+.apk-nav-btn:hover { border-color: var(--gold); color: var(--navy); }
+
+.apk-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.apk-dow {
+  text-align: center;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  padding: 4px 0 6px;
+}
+
+.apk-day {
+  height: 36px;
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  line-height: 1;
+  gap: 3px;
+  font-family: 'Heebo', sans-serif;
+}
+
+.apk-dots {
+  display: flex;
+  gap: 2px;
+}
+
+.apk-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+.apk-dot-m { background: #F59E0B; }
+.apk-dot-a { background: #6366F1; }
+
+.apk-past {
+  color: var(--text-muted);
+  opacity: 0.3;
+}
+
+.apk-free {
+  color: var(--text-main);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.12s, border-color 0.12s;
+}
+.apk-free:hover {
+  background: var(--gold-dim);
+  border-color: var(--gold-border);
+}
+
+.apk-partial {
+  background: var(--gold-dim);
+  border: 1px solid var(--gold-border);
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.apk-full {
+  background: var(--gold);
+  color: #fff;
+  font-weight: 700;
+}
+.apk-full .apk-dot { opacity: 0.8; }
+
+.apk-selected {
+  background: var(--navy);
+  color: #fff;
+  font-weight: 700;
+  border: 1px solid var(--navy);
+}
+
+.apk-legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 0.9rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--gold-border);
+}
+
+.apk-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.71rem;
+  color: var(--text-muted);
+}
+
+.apk-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.apk-swatch-full    { background: var(--gold); }
+.apk-swatch-partial { background: var(--gold-dim); border: 1px solid var(--gold-border); }
+.apk-swatch-free    { background: var(--warm-white); border: 1px solid var(--border); }
+
+.apk-form {
+  background: var(--warm-white);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.apk-form-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.apk-form-date {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 1.1rem;
+  line-height: 1.4;
+}
+
+/* =============================================
+   PICKUP SLOT MANAGEMENT
+   ============================================= */
+.pickup-add-card {
+  background: var(--warm-white);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.pickup-add-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.pickup-date-input {
+  padding: 8px 10px;
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius);
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.88rem;
+  background: var(--ivory);
+  color: var(--navy);
+  outline: none;
+}
+.pickup-date-input:focus { border-color: var(--gold); }
+
+.pickup-time-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.88rem;
+  color: var(--navy);
+  cursor: pointer;
+}
+.pickup-time-check input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--gold);
+  cursor: pointer;
+}
+
+.pickup-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.pickup-table th {
+  text-align: right;
+  padding: 8px 14px;
+  border-bottom: 2px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.pickup-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.pickup-table tr:hover td { background: var(--caramel-light); }
+
+.pickup-row-past td { opacity: 0.45; }
+
+.slot-time-toggles {
+  display: flex;
+  gap: 8px;
+}
+
+.slot-time-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 14px;
+  border-radius: 50px;
+  border: 1px solid var(--border);
+  background: var(--ivory);
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.slot-time-btn:hover { border-color: var(--gold-border); color: var(--navy); }
+
+.slot-time-morning.active {
+  background: #FEF3C7;
+  border-color: #F59E0B;
+  color: #92400E;
+  font-weight: 600;
+}
+.slot-time-afternoon.active {
+  background: #EDE9FE;
+  border-color: #A78BFA;
+  color: #5B21B6;
+  font-weight: 600;
+}
+
+.pickup-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 2rem 0;
+  font-size: 0.9rem;
+}
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+@media (max-width: 600px) {
+  .admin-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .admin-view {
+    padding: 1rem;
+  }
+
+  .orders-table th,
+  .orders-table td {
+    padding: 8px;
+    font-size: 0.78rem;
+  }
+}
+
+/* =============================================
+   CUSTOMER SEARCH TAB
+   ============================================= */
+
+/* Filter card */
+.cust-filter-card {
+  background: var(--warm-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.cust-filter-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.cust-filter-field {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 130px;
+}
+
+.cust-filter-field--date { flex: 0 0 auto; min-width: 240px; }
+.cust-filter-field--clear { flex: 0 0 auto; min-width: auto; }
+
+.cust-filter-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 5px;
+}
+
+.cust-filter-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 11px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.875rem;
+  background: var(--ivory);
+  color: var(--text-main);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  direction: rtl;
+}
+.cust-filter-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+  background: var(--warm-white);
+}
+
+/* Combined date-range picker */
+.cust-daterange {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--ivory);
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.cust-daterange:focus-within {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+  background: var(--warm-white);
+}
+
+.cust-daterange input[type="date"] {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 8px 10px;
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.875rem;
+  background: transparent;
+  color: var(--text-main);
+  direction: ltr;
+  min-width: 0;
+}
+
+.cust-daterange-sep {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  padding: 0 2px;
+  flex-shrink: 0;
+}
+
+.cust-clear-btn { align-self: flex-end; white-space: nowrap; }
+
+/* Autocomplete dropdown */
+.cust-input-wrap { position: relative; }
+
+.cust-suggestions {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  background: var(--warm-white);
+  border: 1px solid var(--gold-border);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  z-index: 100;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.cust-suggestion {
+  padding: 8px 11px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  color: var(--text-main);
+  transition: background 0.1s;
+}
+.cust-suggestion:hover { background: var(--gold-dim); }
+
+.cust-hint {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 3rem 0;
+  font-size: 0.9rem;
+}
+
+/* Summary panel */
+.cust-summary {
+  background: var(--warm-white);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.cust-summary-stats {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.cust-stat { text-align: center; min-width: 70px; }
+
+.cust-stat-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.cust-stat-val {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--navy);
+  font-family: 'Cormorant Garamond', serif;
+}
+
+/* Breakdown */
+.cust-breakdown {
+  border-right: 1px solid var(--gold-border);
+  padding-right: 1.5rem;
+}
+
+.cust-breakdown-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.6rem;
+}
+
+.cust-item-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 0.85rem;
+  padding: 3px 0;
+}
+
+.cust-item-name  { flex: 1; color: var(--text-main); }
+.cust-item-qty   { color: var(--text-muted); font-size: 0.8rem; min-width: 40px; text-align: center; }
+.cust-item-total { font-weight: 600; color: var(--navy); min-width: 55px; text-align: left; }
+
+@media (max-width: 700px) {
+  .cust-filter-field,
+  .cust-filter-field--date { min-width: 100%; flex: 0 0 100%; }
+  .cust-summary { grid-template-columns: 1fr; }
+  .cust-breakdown {
+    border-right: none;
+    border-top: 1px solid var(--gold-border);
+    padding-right: 0;
+    padding-top: 1rem;
+  }
+}

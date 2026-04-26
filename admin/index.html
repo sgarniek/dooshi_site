@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dooshi — לוח ניהול</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍪</text></svg>" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+
+  <style>
+    #loginScreen {
+      min-height: 100vh;
+      background: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .login-card {
+      background: var(--warm-white);
+      border: 1px solid var(--gold-border);
+      border-radius: var(--radius);
+      padding: 2.75rem 2.5rem;
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .login-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: var(--navy);
+      text-align: center;
+      margin-bottom: 0.2rem;
+    }
+
+    .login-tagline {
+      font-size: 0.65rem;
+      color: var(--gold);
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      text-align: center;
+      border-top: 1px solid var(--gold-border);
+      border-bottom: 1px solid var(--gold-border);
+      padding: 4px 0;
+      margin-bottom: 2rem;
+    }
+
+    .login-card h2 {
+      font-size: 1.1rem;
+      color: var(--navy);
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .login-error {
+      background: var(--rose-light);
+      color: var(--rose);
+      border: 1px solid var(--rose);
+      border-radius: var(--radius);
+      padding: 9px 14px;
+      font-size: 0.82rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- מסך כניסה -->
+  <div id="loginScreen" style="display:none">
+    <div class="login-card">
+      <div class="login-logo">Dooshi</div>
+      <div class="login-tagline">Admin Panel</div>
+
+      <h2>כניסה לניהול</h2>
+
+      <div id="loginError" class="login-error"></div>
+
+      <div class="form-group">
+        <label>מייל</label>
+        <input type="email" id="loginEmail" placeholder="admin@dooshi.co.il"
+               onkeydown="if(event.key==='Enter') doLogin()" />
+      </div>
+      <div class="form-group">
+        <label>סיסמה</label>
+        <input type="password" id="loginPassword" placeholder="••••••••"
+               onkeydown="if(event.key==='Enter') doLogin()" />
+      </div>
+
+      <button class="btn btn-primary" id="loginBtn"
+              style="width:100%; justify-content:center; padding:11px; margin-top:0.5rem;"
+              onclick="doLogin()">כניסה</button>
+
+      <button onclick="showForgot()"
+              style="background:none; border:none; cursor:pointer; width:100%; text-align:center;
+                     margin-top:1rem; font-size:0.8rem; color:var(--text-muted); font-family:'Heebo',sans-serif;">
+        שכחתי סיסמא
+      </button>
+    </div>
+
+    <!-- טופס שחזור סיסמה -->
+    <div class="login-card" id="forgotCard" style="display:none">
+      <div class="login-logo">Dooshi</div>
+      <div class="login-tagline">Admin Panel</div>
+
+      <h2>שחזור סיסמה</h2>
+      <p style="font-size:0.83rem; color:var(--text-muted); margin-bottom:1.25rem; line-height:1.6;">
+        הכניסו את כתובת המייל שלכם ונשלח לכם קישור לאיפוס הסיסמה.
+      </p>
+
+      <div id="forgotError" class="login-error"></div>
+      <div id="forgotSuccess" style="display:none; background:var(--sage-light); color:var(--sage);
+           border:1px solid var(--sage); border-radius:var(--radius); padding:9px 14px;
+           font-size:0.82rem; margin-bottom:1rem; line-height:1.5;"></div>
+
+      <div class="form-group">
+        <label>מייל</label>
+        <input type="email" id="forgotEmail" placeholder="admin@dooshi.co.il"
+               onkeydown="if(event.key==='Enter') doForgot()" />
+      </div>
+
+      <button class="btn btn-primary" id="forgotBtn"
+              style="width:100%; justify-content:center; padding:11px; margin-top:0.5rem;"
+              onclick="doForgot()">שליחת קישור</button>
+
+      <button onclick="showLogin()"
+              style="background:none; border:none; cursor:pointer; width:100%; text-align:center;
+                     margin-top:1rem; font-size:0.8rem; color:var(--text-muted); font-family:'Heebo',sans-serif;">
+        ← חזרה לכניסה
+      </button>
+    </div>
+  </div>
+
+  <!-- לוח הניהול -->
+  <div class="admin-view" id="adminContent" style="display:none">
+    <div class="admin-header">
+      <div>
+        <h2>🍪 לוח ניהול — Dooshi</h2>
+        <div style="font-size:0.82rem; color:var(--text-muted); margin-top:2px;">ניהול הזמנות ומוצרים</div>
+      </div>
+      <a href="https://dooshi.co.il" class="btn btn-ghost btn-sm">← חנות</a>
+    </div>
+    <div class="admin-stats" id="adminStats"></div>
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="switchAdminTab('orders', this)">הזמנות</button>
+      <button class="admin-tab" onclick="switchAdminTab('customers', this)">לקוחות</button>
+      <button class="admin-tab" onclick="switchAdminTab('pricing', this)">מוצרים</button>
+      <button class="admin-tab" onclick="switchAdminTab('products', this)">מלאי</button>
+      <button class="admin-tab" onclick="switchAdminTab('pickup', this)">איסוף</button>
+    </div>
+    <div class="admin-tab-content active" id="atab-orders">
+      <div class="admin-order-tabs">
+        <button class="admin-order-tab active" data-tab="active"    onclick="switchAdminOrderTab('active', this)">פעילות</button>
+        <button class="admin-order-tab"        data-tab="completed" onclick="switchAdminOrderTab('completed', this)">הושלמו</button>
+        <button class="admin-order-tab"        data-tab="cancelled" onclick="switchAdminOrderTab('cancelled', this)">בוטלו</button>
+      </div>
+      <div class="order-filter-bar" id="orderFilterBar"></div>
+      <div class="orders-table-wrap">
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>מס׳</th><th>שם</th><th>טלפון</th><th>מועד איסוף</th><th>פריטים</th>
+              <th>סה"כ</th><th>אופן תשלום</th><th>סטטוס תשלום</th><th>WhatsApp</th><th>סטטוס</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody"></tbody>
+        </table>
+        <div class="empty-state" id="ordersEmpty" style="display:none">
+          <div style="font-size:2.5rem; margin-bottom:0.5rem">📋</div>
+          <div>עדיין אין הזמנות</div>
+        </div>
+      </div>
+    </div>
+    <div class="admin-tab-content" id="atab-products">
+      <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem">
+        השבתת מוצר תמנע ממנו להופיע בחנות
+      </div>
+      <div class="products-admin-grid" id="adminProductsGrid"></div>
+    </div>
+
+    <div class="admin-tab-content" id="atab-pricing">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; gap:1rem;">
+        <div style="font-size:0.85rem; color:var(--text-muted)">שינוי מחיר ישתקף מיד בחנות</div>
+        <button class="btn btn-primary btn-sm" onclick="openNewProductModal()">+ הוסף מוצר</button>
+      </div>
+      <div id="pricingGrid"></div>
+    </div>
+  </div>
+
+  <!-- New Product Modal -->
+  <div class="modal-overlay" id="newProductModal">
+    <div class="modal" style="max-width:420px">
+      <h3>הוספת מוצר חדש</h3>
+
+      <div class="form-group">
+        <label>שם המוצר</label>
+        <input type="text" id="newProdName" placeholder="לדוגמה: עוגיית שוקולד לבן"
+               onkeydown="if(event.key==='Enter') saveNewProduct()" />
+      </div>
+
+      <div class="form-group">
+        <label>סוג</label>
+        <select id="newProdType" onchange="updateDefaultEmoji()" style="padding:8px 10px; border:1px solid var(--gold-border); border-radius:var(--radius); font-family:'Heebo',sans-serif; font-size:0.88rem; background:var(--warm-white); color:var(--navy); width:100%; outline:none;">
+          <option value="cookie">🍪 עוגייה</option>
+          <option value="muffin">🧁 מאפין</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="bundle-toggle-label">
+          <input type="checkbox" id="newProdIsBundle" />
+          <span>🎁 מארז</span>
+          <span style="font-size:0.75rem; color:var(--text-muted); font-weight:400">(ניתן לסמן בנוסף לסוג)</span>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label>אמוג'י</label>
+        <div class="emoji-picker" id="emojiPicker">
+          <button type="button" class="emoji-opt selected" data-emoji="🍪" onclick="selectEmoji(this)">🍪</button>
+          <button type="button" class="emoji-opt" data-emoji="🧁" onclick="selectEmoji(this)">🧁</button>
+          <button type="button" class="emoji-opt" data-emoji="🍰" onclick="selectEmoji(this)">🍰</button>
+          <button type="button" class="emoji-opt" data-emoji="🎂" onclick="selectEmoji(this)">🎂</button>
+          <button type="button" class="emoji-opt" data-emoji="🍩" onclick="selectEmoji(this)">🍩</button>
+          <button type="button" class="emoji-opt" data-emoji="🍫" onclick="selectEmoji(this)">🍫</button>
+          <button type="button" class="emoji-opt" data-emoji="🍬" onclick="selectEmoji(this)">🍬</button>
+          <button type="button" class="emoji-opt" data-emoji="🍭" onclick="selectEmoji(this)">🍭</button>
+          <button type="button" class="emoji-opt" data-emoji="🥐" onclick="selectEmoji(this)">🥐</button>
+          <button type="button" class="emoji-opt" data-emoji="🥧" onclick="selectEmoji(this)">🥧</button>
+          <button type="button" class="emoji-opt" data-emoji="🍓" onclick="selectEmoji(this)">🍓</button>
+          <button type="button" class="emoji-opt" data-emoji="🫐" onclick="selectEmoji(this)">🫐</button>
+          <button type="button" class="emoji-opt" data-emoji="🍋" onclick="selectEmoji(this)">🍋</button>
+          <button type="button" class="emoji-opt" data-emoji="🍌" onclick="selectEmoji(this)">🍌</button>
+          <button type="button" class="emoji-opt" data-emoji="🥜" onclick="selectEmoji(this)">🥜</button>
+          <button type="button" class="emoji-opt" data-emoji="🌰" onclick="selectEmoji(this)">🌰</button>
+          <button type="button" class="emoji-opt" data-emoji="🎁" onclick="selectEmoji(this)">🎁</button>
+          <button type="button" class="emoji-opt" data-emoji="🎀" onclick="selectEmoji(this)">🎀</button>
+        </div>
+        <input type="hidden" id="newProdEmoji" value="🍪" />
+      </div>
+
+      <div class="form-group">
+        <label>מחיר (₪)</label>
+        <input type="number" id="newProdPrice" min="1" placeholder="13" />
+      </div>
+
+      <div class="form-group">
+        <label>תיאור</label>
+        <textarea id="newProdDesc" rows="2" placeholder="תיאור קצר של המוצר"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>תמונה (URL)</label>
+        <input type="text" id="newProdImage" placeholder="images/my-product.jpg" dir="ltr" />
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeNewProductModal()">ביטול</button>
+        <button class="btn btn-primary" id="newProdSaveBtn" onclick="saveNewProduct()">הוסף מוצר</button>
+      </div>
+    </div>
+  </div>
+
+    <div class="admin-tab-content" id="atab-customers">
+      <div class="cust-filter-card">
+        <div class="cust-filter-row">
+
+          <div class="cust-filter-field">
+            <label class="cust-filter-label">שם פרטי</label>
+            <input class="cust-filter-input" type="text" id="custFirst"
+                   placeholder="חיפוש..." oninput="renderCustomerView()" />
+          </div>
+
+          <div class="cust-filter-field">
+            <label class="cust-filter-label">שם משפחה</label>
+            <div class="cust-input-wrap">
+              <input class="cust-filter-input" type="text" id="custLast"
+                     placeholder="חיפוש..."
+                     oninput="renderCustomerView(); showLastNameSuggestions()"
+                     onblur="setTimeout(hideLastNameSuggestions, 150)"
+                     autocomplete="off" />
+              <div class="cust-suggestions" id="lastNameDropdown" style="display:none"></div>
+            </div>
+          </div>
+
+          <div class="cust-filter-field">
+            <label class="cust-filter-label">טלפון</label>
+            <input class="cust-filter-input" type="tel" id="custPhone"
+                   placeholder="05X..." oninput="renderCustomerView()" dir="ltr" />
+          </div>
+
+          <div class="cust-filter-field cust-filter-field--date">
+            <label class="cust-filter-label">טווח תאריכי איסוף</label>
+            <div class="cust-daterange">
+              <input type="date" id="custFromDate" oninput="renderCustomerView()" />
+              <span class="cust-daterange-sep">—</span>
+              <input type="date" id="custToDate"   oninput="renderCustomerView()" />
+            </div>
+          </div>
+
+          <div class="cust-filter-field cust-filter-field--clear">
+            <label class="cust-filter-label">&nbsp;</label>
+            <button class="btn btn-ghost btn-sm cust-clear-btn" onclick="clearCustomerSearch()">נקה</button>
+          </div>
+
+        </div>
+      </div>
+      <div id="customerResults"></div>
+    </div>
+
+    <div class="admin-tab-content" id="atab-pickup">
+
+      <!-- כפתור הוספה — מוצג כברירת מחדל -->
+      <div id="addSlotBtnRow">
+        <button class="btn btn-primary btn-sm" onclick="openPickupCalendar()">+ הוסף תאריך</button>
+      </div>
+
+      <!-- לוח שנה + טופס — מוצגים רק לאחר לחיצה -->
+      <div id="apkWidget" style="display:none">
+        <div class="apk-wrap">
+
+          <!-- לוח שנה -->
+          <div class="apk-cal">
+            <div class="apk-nav">
+              <button class="apk-nav-btn" onclick="nextAdminCalMonth()">&#8592;</button>
+              <span id="adminCalMonthLabel" class="apk-month"></span>
+              <button class="apk-nav-btn" onclick="prevAdminCalMonth()">&#8594;</button>
+            </div>
+            <div id="adminCalGrid" class="apk-grid"></div>
+            <div class="apk-legend">
+              <span class="apk-legend-item"><span class="apk-swatch apk-swatch-full"></span> שני זמנים</span>
+              <span class="apk-legend-item"><span class="apk-swatch apk-swatch-partial"></span> זמן אחד</span>
+              <span class="apk-legend-item"><span class="apk-swatch apk-swatch-free"></span> פנוי — לחץ לבחירה</span>
+            </div>
+          </div>
+
+          <!-- טופס הוספה -->
+          <div id="newSlotForm" class="apk-form" style="display:none">
+            <div class="apk-form-label">תאריך נבחר</div>
+            <div id="selectedSlotLabel" class="apk-form-date"></div>
+            <input type="hidden" id="newSlotDate" />
+            <label class="pickup-time-check" style="margin-bottom:8px">
+              <input type="checkbox" id="newSlotMorning" /> 🌅 בוקר
+            </label>
+            <label class="pickup-time-check" style="margin-bottom:16px">
+              <input type="checkbox" id="newSlotAfternoon" /> 🌆 אחה"צ
+            </label>
+            <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="addPickupSlot()">+ הוסף</button>
+          </div>
+
+        </div>
+        <div style="margin-top:0.75rem">
+          <button class="btn btn-ghost btn-sm" onclick="closePickupCalendar()">ביטול</button>
+        </div>
+      </div>
+
+      <!-- רשימת תאריכים קיימים -->
+      <div id="pickupSlotsList" style="margin-top:2rem"></div>
+    </div>
+
+  <!-- WhatsApp Confirm Modal -->
+  <div class="modal-overlay" id="waConfirmModal">
+    <div class="modal" style="max-width:360px">
+      <h3>שליחת WhatsApp</h3>
+      <p id="waConfirmText"></p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost"   id="waConfirmSkip">דלג</button>
+        <button class="btn btn-success" id="waConfirmSend">💬 שלח הודעה</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WhatsApp Modal -->
+  <div class="modal-overlay" id="smsModal">
+    <div class="modal">
+      <h3 id="smsModalTitle">שליחת WhatsApp</h3>
+      <p id="smsModalDesc"></p>
+      <div class="modal-sms-preview" id="smsPreview"></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal()">ביטול</button>
+        <button class="btn btn-success" onclick="confirmWhatsApp()">💬 פתח WhatsApp</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inactivity Warning Modal -->
+  <div class="modal-overlay" id="inactivityModal">
+    <div class="modal" style="max-width:360px; text-align:center;">
+      <h3>עדיין כאן?</h3>
+      <p>לא זוהתה פעילות. תתנתק אוטומטית בעוד<br>
+        <strong id="inactivityCountdown" style="font-size:1.6rem; color:var(--rose);">30</strong> שניות
+      </p>
+      <div class="modal-actions" style="justify-content:center;">
+        <button class="btn btn-primary" onclick="stayLoggedIn()">כן, להישאר מחובר</button>
+        <button class="btn btn-ghost"   onclick="doLogout()">התנתק</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/data.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/admin.js"></script>
+
+  <script>
+    function showForgot() {
+      document.querySelector('.login-card').style.display = 'none';
+      document.getElementById('forgotCard').style.display = '';
+      document.getElementById('forgotEmail').focus();
+    }
+
+    function showLogin() {
+      document.getElementById('forgotCard').style.display = 'none';
+      document.querySelector('.login-card').style.display = '';
+      document.getElementById('loginEmail').focus();
+    }
+
+    // =============================================
+    // עזר — הצפנה (זהה ל-auth.js של הלקוח)
+    // =============================================
+    async function hashPassword(password, salt) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password + salt);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+    }
+
+    // =============================================
+    // Auth + Inactivity Timer
+    // =============================================
+
+    const INACTIVITY_MS = 2 * 60 * 1000; // 2 דקות
+    const GRACE_MS      = 30 * 1000;      // 30 שניות לאחר האזהרה
+    let inactivityTimer  = null;
+    let logoutTimer      = null;
+    let countdownInterval = null;
+
+    function showAdmin() {
+      sessionStorage.setItem('adminAuth', '1');
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminContent').style.display = '';
+      renderAdmin();
+      startInactivityWatch();
+    }
+
+    async function doLogin() {
+      const email    = document.getElementById('loginEmail').value.trim().toLowerCase();
+      const password = document.getElementById('loginPassword').value;
+      const errorEl  = document.getElementById('loginError');
+      const btn      = document.getElementById('loginBtn');
+
+      errorEl.style.display = 'none';
+
+      if (!email || !password) {
+        errorEl.textContent = 'נא למלא מייל וסיסמה';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      btn.textContent = '...';
+      btn.disabled = true;
+
+      const { data, error } = await db.from('admins')
+        .select('password_hash, salt')
+        .eq('email', email)
+        .single();
+
+      btn.textContent = 'כניסה';
+      btn.disabled = false;
+
+      if (error || !data) {
+        errorEl.textContent = 'פרטי כניסה שגויים';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      const hash = await hashPassword(password, data.salt);
+      if (hash !== data.password_hash) {
+        errorEl.textContent = 'פרטי כניסה שגויים';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      showAdmin();
+    }
+
+    async function doForgot() {
+      const email     = document.getElementById('forgotEmail').value.trim().toLowerCase();
+      const errorEl   = document.getElementById('forgotError');
+      const successEl = document.getElementById('forgotSuccess');
+      const btn       = document.getElementById('forgotBtn');
+
+      errorEl.style.display   = 'none';
+      successEl.style.display = 'none';
+
+      if (!email) {
+        errorEl.textContent    = 'נא להכניס כתובת מייל';
+        errorEl.style.display  = 'block';
+        return;
+      }
+
+      btn.textContent = '...';
+      btn.disabled    = true;
+
+      // Check admin exists (silently succeed either way to avoid enumeration)
+      const { data: admin } = await db.from('admins')
+        .select('id').eq('email', email).single();
+
+      if (admin) {
+        // Generate token, store with 1-hour expiry
+        const tokenArr = new Uint8Array(32);
+        crypto.getRandomValues(tokenArr);
+        const token   = Array.from(tokenArr).map(b => b.toString(16).padStart(2, '0')).join('');
+        const expires = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+
+        await db.from('admins').update({
+          reset_token: token,
+          reset_token_expires: expires,
+        }).eq('email', email);
+
+        const isLocal  = ['localhost', '127.0.0.1'].includes(location.hostname);
+        const base     = isLocal ? `http://${location.host}/admin` : 'https://admin.dooshi.co.il';
+        const resetUrl = `${base}/reset.html?token=${token}`;
+
+        try {
+          await fetch('/.netlify/functions/send-reset-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ to: email, resetUrl }),
+          });
+        } catch (_) {
+          if (isLocal) console.log('Admin reset URL:', resetUrl);
+        }
+      }
+
+      btn.textContent = 'שליחת קישור';
+      btn.disabled    = false;
+      successEl.textContent  = 'אם הכתובת קיימת במערכת, ישלח קישור לאיפוס.';
+      successEl.style.display = 'block';
+      btn.style.display = 'none';
+    }
+
+    function doLogout() {
+      sessionStorage.removeItem('adminAuth');
+      clearTimeout(inactivityTimer);
+      clearTimeout(logoutTimer);
+      clearInterval(countdownInterval);
+      document.getElementById('inactivityModal').classList.remove('open');
+      document.getElementById('adminContent').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('loginEmail').focus();
+    }
+
+    function stayLoggedIn() {
+      document.getElementById('inactivityModal').classList.remove('open');
+      clearTimeout(logoutTimer);
+      clearInterval(countdownInterval);
+      resetInactivityTimer();
+    }
+
+    function startInactivityWatch() {
+      ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'].forEach(evt =>
+        document.addEventListener(evt, resetInactivityTimer, { passive: true })
+      );
+      resetInactivityTimer();
+    }
+
+    function resetInactivityTimer() {
+      // אם האזהרה פתוחה — אל תאפס (המשתמש צריך לבחור)
+      if (document.getElementById('inactivityModal').classList.contains('open')) return;
+      clearTimeout(inactivityTimer);
+      inactivityTimer = setTimeout(showInactivityWarning, INACTIVITY_MS);
+    }
+
+    function showInactivityWarning() {
+      let secondsLeft = Math.round(GRACE_MS / 1000);
+      document.getElementById('inactivityCountdown').textContent = secondsLeft;
+      document.getElementById('inactivityModal').classList.add('open');
+
+      countdownInterval = setInterval(() => {
+        secondsLeft--;
+        document.getElementById('inactivityCountdown').textContent = secondsLeft;
+        if (secondsLeft <= 0) { clearInterval(countdownInterval); }
+      }, 1000);
+
+      logoutTimer = setTimeout(() => {
+        clearInterval(countdownInterval);
+        doLogout();
+      }, GRACE_MS);
+    }
+
+    // אתחול — בדיקת סשן קיים
+    if (sessionStorage.getItem('adminAuth')) {
+      showAdmin();
+    } else {
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('loginEmail').focus();
+    }
+  </script>
+
+</body>
+</html>
