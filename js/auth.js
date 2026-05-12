@@ -124,6 +124,10 @@ function switchAuthTab(tab) {
   document.querySelectorAll('.auth-tab-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.tab === tab);
   });
+  if (tab === 'forgot') {
+    document.getElementById('authForgotSuccess').style.display = 'none';
+    document.getElementById('authForgotPanel').style.display = '';
+  }
   clearAuthMessages();
 }
 
@@ -317,7 +321,8 @@ async function doAuthForgot() {
 
   btn.textContent = 'שלח קישור';
   btn.disabled = false;
-  showAuthMsg(msgEl, 'אם המייל קיים במערכת, ישלח אליו קישור לאיפוס סיסמה', 'success');
+  document.getElementById('authForgotPanel').style.display = 'none';
+  document.getElementById('authForgotSuccess').style.display = '';
 }
 
 // =============================================

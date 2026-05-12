@@ -514,40 +514,44 @@
       btn.textContent = '...';
       btn.disabled    = true;
 
-      // Check admin exists (silently succeed either way to avoid enumeration)
       const { data: admin } = await db.from('admins')
         .select('id, first_name').eq('email', email).single();
 
-      if (admin) {
-        // Generate token, store with 1-hour expiry
-        const tokenArr = new Uint8Array(32);
-        crypto.getRandomValues(tokenArr);
-        const token   = Array.from(tokenArr).map(b => b.toString(16).padStart(2, '0')).join('');
-        const expires = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+      if (!admin) {
+        errorEl.textContent   = 'כתובת המייל אינה מזוהה במערכת';
+        errorEl.style.display = 'block';
+        btn.textContent = 'שליחת קישור';
+        btn.disabled    = false;
+        return;
+      }
 
-        await db.from('admins').update({
-          reset_token: token,
-          reset_token_expires: expires,
-        }).eq('email', email);
+      const tokenArr = new Uint8Array(32);
+      crypto.getRandomValues(tokenArr);
+      const token   = Array.from(tokenArr).map(b => b.toString(16).padStart(2, '0')).join('');
+      const expires = new Date(Date.now() + 60 * 60 * 1000).toISOString();
 
-        const isLocal  = ['localhost', '127.0.0.1'].includes(location.hostname);
-        const base     = isLocal ? `http://${location.host}/admin` : 'https://admin.dooshi.co.il';
-        const resetUrl = `${base}/reset.html?token=${token}`;
+      await db.from('admins').update({
+        reset_token: token,
+        reset_token_expires: expires,
+      }).eq('email', email);
 
-        try {
-          await fetch('https://dooshi.co.il/.netlify/functions/send-reset-email', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ to: email, firstName: admin.first_name, resetUrl }),
-          });
-        } catch (_) {
-          if (isLocal) console.log('Admin reset URL:', resetUrl);
-        }
+      const isLocal  = ['localhost', '127.0.0.1'].includes(location.hostname);
+      const base     = isLocal ? `http://${location.host}/admin` : 'https://admin.dooshi.co.il';
+      const resetUrl = `${base}/reset.html?token=${token}`;
+
+      try {
+        await fetch('https://dooshi.co.il/.netlify/functions/send-reset-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to: email, firstName: admin.first_name, resetUrl }),
+        });
+      } catch (_) {
+        if (isLocal) console.log('Admin reset URL:', resetUrl);
       }
 
       btn.textContent = 'שליחת קישור';
       btn.disabled    = false;
-      successEl.textContent  = 'אם הכתובת קיימת במערכת, ישלח קישור לאיפוס.';
+      successEl.textContent  = 'קישור לאיפוס סיסמה נשלח לכתובת המייל שלך.';
       successEl.style.display = 'block';
       btn.style.display = 'none';
     }
