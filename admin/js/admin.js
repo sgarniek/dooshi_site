@@ -9,6 +9,7 @@ const STATUS_CLASSES  = { new: 'status-new', approved: 'status-approved', ready:
 const TIME_LABELS = { morning: '🌅 בוקר', afternoon: '🌆 אחה"צ' };
 
 let adminPickupSlots    = [];
+let pickupDateTab       = 'future';
 let orderFilter         = { date: null, time: null };
 let adminOrderTab       = 'active';
 let adminCalYear        = null;
@@ -915,6 +916,13 @@ function nextAdminCalMonth() {
   renderAdminPickupCalendar();
 }
 
+function switchPickupDateTab(tab, btn) {
+  pickupDateTab = tab;
+  document.querySelectorAll('.admin-pickup-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPickupSlotsTable();
+}
+
 async function renderPickupSlots() {
   const today = new Date().toISOString().split('T')[0];
   const { data, error } = await db.from('pickup_slots')
@@ -928,11 +936,23 @@ async function renderPickupSlots() {
     renderAdminPickupCalendar();
   }
 
-  const list = document.getElementById('pickupSlotsList');
-  if (!adminPickupSlots.length) {
-    list.innerHTML = '<div class="pickup-empty">אין תאריכים מוגדרים</div>';
+  renderPickupSlotsTable();
+}
+
+function renderPickupSlotsTable() {
+  const today = new Date().toISOString().split('T')[0];
+  const list  = document.getElementById('pickupSlotsList');
+
+  const slots = adminPickupSlots.filter(s =>
+    pickupDateTab === 'future' ? s.slot_date >= today : s.slot_date < today
+  );
+
+  if (!slots.length) {
+    list.innerHTML = `<div class="pickup-empty">${pickupDateTab === 'future' ? 'אין תאריכים עתידיים' : 'אין תאריכים שעברו'}</div>`;
     return;
   }
+
+  const displaySlots = pickupDateTab === 'past' ? [...slots].reverse() : slots;
 
   list.innerHTML = `
     <table class="pickup-table">
@@ -944,17 +964,19 @@ async function renderPickupSlots() {
         </tr>
       </thead>
       <tbody>
-        ${adminPickupSlots.map(slot => `
-          <tr class="${slot.slot_date < today ? 'pickup-row-past' : ''}">
+        ${displaySlots.map(slot => `
+          <tr>
             <td>${formatAdminDate(slot.slot_date)}</td>
             <td>
               <div class="slot-time-toggles">
                 <button class="slot-time-btn slot-time-morning ${slot.morning ? 'active' : ''}"
-                        onclick="updatePickupSlot(${slot.id}, 'morning', ${!slot.morning})">
+                        onclick="updatePickupSlot(${slot.id}, 'morning', ${!slot.morning})"
+                        ${pickupDateTab === 'past' ? 'disabled' : ''}>
                   🌅 בוקר
                 </button>
                 <button class="slot-time-btn slot-time-afternoon ${slot.afternoon ? 'active' : ''}"
-                        onclick="updatePickupSlot(${slot.id}, 'afternoon', ${!slot.afternoon})">
+                        onclick="updatePickupSlot(${slot.id}, 'afternoon', ${!slot.afternoon})"
+                        ${pickupDateTab === 'past' ? 'disabled' : ''}>
                   🌆 אחה"צ
                 </button>
               </div>
@@ -1213,7 +1235,7 @@ async function sendCouponEmails(couponId) {
       body: JSON.stringify({ recipients, coupon }),
     });
     if (!res.ok) throw new Error(await res.text());
-    showToast(`נשלח ל-${recipients.length} משתמשים ✓`, '✓');
+    showToast(`נשלח ל-${recipients.length} משתמשים`, '');
   } catch (e) {
     console.error('Failed to send coupon emails:', e);
     showToast('שגיאה בשליחת המיילים', '❌');

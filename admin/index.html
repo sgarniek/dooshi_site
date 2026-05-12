@@ -319,9 +319,17 @@
 
     <div class="admin-tab-content" id="atab-pickup">
 
-      <!-- כפתור הוספה — מוצג כברירת מחדל -->
-      <div id="addSlotBtnRow">
-        <button class="btn btn-primary btn-sm" onclick="openPickupCalendar()">+ הוסף תאריך</button>
+      <!-- שורת כותרת -->
+      <div style="display:flex; align-items:center; justify-content:flex-end; margin-bottom:1.25rem;">
+        <div id="addSlotBtnRow">
+          <button class="btn btn-primary btn-sm" onclick="openPickupCalendar()">+ הוסף תאריך</button>
+        </div>
+      </div>
+
+      <!-- טאבים עתידי / עבר -->
+      <div class="admin-order-tabs">
+        <button class="admin-pickup-tab active" data-pickup-tab="future" onclick="switchPickupDateTab('future', this)">תאריכים עתידיים</button>
+        <button class="admin-pickup-tab"        data-pickup-tab="past"   onclick="switchPickupDateTab('past', this)">תאריכים שעברו</button>
       </div>
 
       <!-- לוח שנה + טופס — מוצגים רק לאחר לחיצה -->
@@ -363,13 +371,12 @@
         </div>
       </div>
 
-      <!-- רשימת תאריכים קיימים -->
-      <div id="pickupSlotsList" style="margin-top:2rem"></div>
+      <div id="pickupSlotsList"></div>
     </div>
 
   <div class="admin-tab-content" id="atab-coupons">
 
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem;">
+    <div style="display:flex; align-items:center; justify-content:flex-end; margin-bottom:1.25rem;">
       <button class="btn btn-primary btn-sm" onclick="openCouponForm()">+ קופון חדש</button>
     </div>
 

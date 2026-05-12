@@ -557,6 +557,26 @@
   font-weight: 600;
 }
 
+.admin-pickup-tab {
+  padding: 8px 18px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.admin-pickup-tab:hover { color: var(--navy); }
+.admin-pickup-tab.active {
+  color: var(--navy);
+  border-bottom-color: var(--gold);
+  font-weight: 600;
+}
+
 /* =============================================
    ORDER FILTER BAR
    ============================================= */
