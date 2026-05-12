@@ -516,7 +516,7 @@
 
       // Check admin exists (silently succeed either way to avoid enumeration)
       const { data: admin } = await db.from('admins')
-        .select('id').eq('email', email).single();
+        .select('id, first_name').eq('email', email).single();
 
       if (admin) {
         // Generate token, store with 1-hour expiry
@@ -538,7 +538,7 @@
           await fetch('https://dooshi.co.il/.netlify/functions/send-reset-email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ to: email, resetUrl }),
+            body: JSON.stringify({ to: email, firstName: admin.first_name, resetUrl }),
           });
         } catch (_) {
           if (isLocal) console.log('Admin reset URL:', resetUrl);

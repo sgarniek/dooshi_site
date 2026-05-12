@@ -273,11 +273,11 @@ nav .btn-ghost:hover {
   inset: 0;
   background: rgba(8,14,28,0.72);
   z-index: 300;
-  align-items: center;
-  justify-content: center;
+  overflow-y: auto;
+  padding: 1.5rem 1rem;
 }
 .modal-overlay.open {
-  display: flex;
+  display: block;
 }
 
 .modal {
@@ -288,6 +288,7 @@ nav .btn-ghost:hover {
   max-width: 440px;
   width: 90%;
   box-shadow: 0 24px 64px rgba(12,20,40,0.35);
+  margin: 0 auto;
 }
 .modal h3 {
   font-size: 1.3rem;
