@@ -535,7 +535,7 @@
         const resetUrl = `${base}/reset.html?token=${token}`;
 
         try {
-          await fetch('/.netlify/functions/send-reset-email', {
+          await fetch('https://dooshi.co.il/.netlify/functions/send-reset-email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ to: email, resetUrl }),

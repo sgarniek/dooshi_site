@@ -1,6 +1,16 @@
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
 exports.handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+  }
+
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return { statusCode: 405, headers: CORS_HEADERS, body: 'Method Not Allowed' };
   }
 
   const { to, firstName, resetUrl } = JSON.parse(event.body || '{}');
@@ -56,8 +66,8 @@ exports.handler = async (event) => {
   if (!res.ok) {
     const err = await res.text();
     console.error('Resend error:', err);
-    return { statusCode: 500, body: 'Failed to send email' };
+    return { statusCode: 500, headers: CORS_HEADERS, body: 'Failed to send email' };
   }
 
-  return { statusCode: 200, body: 'OK' };
+  return { statusCode: 200, headers: CORS_HEADERS, body: 'OK' };
 };
