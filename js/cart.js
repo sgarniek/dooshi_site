@@ -102,6 +102,8 @@ function updateCartUI() {
 
   footer.style.display = 'block';
   document.getElementById('cartTotal').textContent = '₪' + total;
+
+  if (typeof revalidateCoupon === 'function') revalidateCoupon();
 }
 
 // -- פתיחה/סגירה של ה-Drawer --
@@ -139,6 +141,9 @@ async function goToOrder() {
       prefillPickupSelection(editingOrderData.pickup_date, editingOrderData.pickup_time);
     }
   }
+
+  const couponSection = document.getElementById('couponSection');
+  if (couponSection) couponSection.style.display = currentUser ? '' : 'none';
 
   showView('order');
 }

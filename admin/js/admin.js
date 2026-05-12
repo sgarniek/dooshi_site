@@ -455,6 +455,7 @@ function switchAdminTab(tabName, clickedBtn) {
   document.getElementById('atab-' + tabName).classList.add('active');
   if (tabName === 'pickup')    renderPickupSlots();
   if (tabName === 'customers') renderCustomerView();
+  if (tabName === 'coupons')   renderCoupons();
 }
 
 // =============================================
@@ -1007,4 +1008,214 @@ async function deletePickupSlot(slotId) {
 
   await renderPickupSlots();
   showToast('תאריך נמחק', '○');
+}
+
+// =============================================
+// קופונים
+// =============================================
+
+async function renderCoupons() {
+  const listEl = document.getElementById('couponsList');
+  listEl.innerHTML = '<div style="color:var(--text-muted); font-size:0.9rem;">טוען...</div>';
+
+  const [couponsRes, usagesRes] = await Promise.all([
+    db.from('coupons').select('*').order('created_at', { ascending: false }),
+    db.from('coupon_usages').select('coupon_id, customer_id'),
+  ]);
+
+  if (couponsRes.error) { listEl.innerHTML = '<div style="color:var(--rose)">שגיאה בטעינת קופונים</div>'; return; }
+
+  const coupons = couponsRes.data || [];
+  const usages  = usagesRes.data || [];
+
+  if (!coupons.length) {
+    listEl.innerHTML = '<div style="color:var(--text-muted); font-size:0.9rem; padding:1rem 0;">אין קופונים מוגדרים</div>';
+    return;
+  }
+
+  listEl.innerHTML = `
+    <table class="orders-table" style="min-width:0;">
+      <thead>
+        <tr>
+          <th>קוד</th>
+          <th>הנחה</th>
+          <th>מינימום</th>
+          <th>שימושים/משתמש</th>
+          <th>משתמשים</th>
+          <th>שימושים</th>
+          <th>תפוגה</th>
+          <th>פעיל</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        ${coupons.map(c => {
+          const useCount   = usages.filter(u => u.coupon_id === c.id).length;
+          const userCount  = usages.filter(u => u.coupon_id === c.id).reduce((acc, u) => { acc.add(u.customer_id); return acc; }, new Set()).size;
+          const discountLabel = c.type === 'fixed'
+            ? `₪${c.value}`
+            : `${c.value}%${c.max_discount ? ` (עד ₪${c.max_discount})` : ''}`;
+          const usersLabel = c.allowed_user_ids ? `${c.allowed_user_ids.length} משתמשים` : 'כולם';
+          return `
+            <tr style="${c.active ? '' : 'opacity:0.5;'}">
+              <td><strong style="font-family:monospace; letter-spacing:1px;">${c.code}</strong></td>
+              <td>${discountLabel}</td>
+              <td>${c.min_order_amount > 0 ? '₪' + c.min_order_amount : '—'}</td>
+              <td>${c.max_usages_per_user}</td>
+              <td>${usersLabel}</td>
+              <td>${useCount} (${userCount} משתמשים)</td>
+              <td>${c.expires_at ? new Date(c.expires_at + 'T00:00:00').toLocaleDateString('he-IL') : '—'}</td>
+              <td>
+                <label style="cursor:pointer;">
+                  <input type="checkbox" ${c.active ? 'checked' : ''} onchange="toggleCouponActive('${c.id}', this.checked)" />
+                </label>
+              </td>
+              <td style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn btn-ghost btn-sm" onclick="openCouponForm('${c.id}')">עריכה</button>
+                ${c.allowed_user_ids?.length ? `<button class="btn btn-sm" style="background:var(--sage-light);color:var(--sage);border:1px solid var(--sage);border-radius:var(--radius);" onclick="sendCouponEmails('${c.id}')">📧 שלח</button>` : ''}
+                <button class="btn btn-sm" style="background:var(--rose-light);color:var(--rose);border:1px solid var(--rose);border-radius:var(--radius);" onclick="deleteCoupon('${c.id}')">מחק</button>
+              </td>
+            </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+function openCouponForm(couponId = null) {
+  document.getElementById('couponFormPanel').style.display = '';
+  document.getElementById('couponFormTitle').textContent = couponId ? 'עריכת קופון' : 'קופון חדש';
+  document.getElementById('cfEditId').value = couponId || '';
+
+  if (!couponId) {
+    document.getElementById('cfCode').value = '';
+    document.getElementById('cfValue').value = '';
+    document.getElementById('cfMaxDiscount').value = '';
+    document.getElementById('cfMinOrder').value = '0';
+    document.getElementById('cfMaxUsages').value = '1';
+    document.getElementById('cfExpiresAt').value = '';
+    setCouponType('fixed');
+    setCouponUsers('all');
+    document.getElementById('cfUsersEmails').value = '';
+    return;
+  }
+
+  db.from('coupons').select('*').eq('id', couponId).single().then(async ({ data: c }) => {
+    if (!c) return;
+    document.getElementById('cfCode').value      = c.code;
+    document.getElementById('cfValue').value     = c.value;
+    document.getElementById('cfMaxDiscount').value = c.max_discount || '';
+    document.getElementById('cfMinOrder').value  = c.min_order_amount || 0;
+    document.getElementById('cfMaxUsages').value  = c.max_usages_per_user || 1;
+    document.getElementById('cfExpiresAt').value  = c.expires_at || '';
+    setCouponType(c.type);
+
+    if (c.allowed_user_ids && c.allowed_user_ids.length) {
+      setCouponUsers('specific');
+      const { data: customers } = await db.from('customers')
+        .select('email').in('id', c.allowed_user_ids);
+      document.getElementById('cfUsersEmails').value = (customers || []).map(c => c.email).join('\n');
+    } else {
+      setCouponUsers('all');
+    }
+  });
+}
+
+function closeCouponForm() {
+  document.getElementById('couponFormPanel').style.display = 'none';
+}
+
+function setCouponType(type) {
+  document.getElementById('cfType').value = type;
+  document.getElementById('cfTypeFixed').classList.toggle('selected', type === 'fixed');
+  document.getElementById('cfTypePercent').classList.toggle('selected', type === 'percentage');
+  document.getElementById('cfValueLabel').textContent = type === 'fixed' ? 'סכום הנחה (₪)' : 'אחוז הנחה (%)';
+  document.getElementById('cfMaxDiscountGroup').style.display = type === 'percentage' ? '' : 'none';
+}
+
+function setCouponUsers(mode) {
+  document.getElementById('cfUsersType').value = mode;
+  document.getElementById('cfUsersAll').classList.toggle('selected', mode === 'all');
+  document.getElementById('cfUsersSpecific').classList.toggle('selected', mode === 'specific');
+  document.getElementById('cfUsersEmailsGroup').style.display = mode === 'specific' ? '' : 'none';
+}
+
+async function saveCoupon() {
+  const code      = document.getElementById('cfCode').value.trim().toUpperCase();
+  const type      = document.getElementById('cfType').value;
+  const value     = parseFloat(document.getElementById('cfValue').value);
+  const maxDisc   = parseFloat(document.getElementById('cfMaxDiscount').value) || null;
+  const minOrder  = parseFloat(document.getElementById('cfMinOrder').value) || 0;
+  const maxUsages = parseInt(document.getElementById('cfMaxUsages').value) || 1;
+  const usersType = document.getElementById('cfUsersType').value;
+  const editId    = document.getElementById('cfEditId').value;
+
+  if (!code)         { showToast('נא להזין קוד קופון', '⚠️'); return; }
+  if (isNaN(value) || value <= 0) { showToast('נא להזין ערך הנחה', '⚠️'); return; }
+  if (type === 'percentage' && value > 100) { showToast('אחוז הנחה מקסימלי הוא 100', '⚠️'); return; }
+
+  let allowed_user_ids = null;
+  if (usersType === 'specific') {
+    const emails = document.getElementById('cfUsersEmails').value
+      .split('\n').map(e => e.trim().toLowerCase()).filter(Boolean);
+    if (!emails.length) { showToast('נא להזין לפחות מייל אחד', '⚠️'); return; }
+    const { data: customers } = await db.from('customers').select('id').in('email', emails);
+    if (!customers?.length) { showToast('לא נמצאו משתמשים עם המיילים שהוזנו', '⚠️'); return; }
+    allowed_user_ids = customers.map(c => c.id);
+  }
+
+  const expiresAt = document.getElementById('cfExpiresAt').value || null;
+  const payload = { code, type, value, max_discount: maxDisc, min_order_amount: minOrder, max_usages_per_user: maxUsages, allowed_user_ids, expires_at: expiresAt };
+
+  if (editId) {
+    const { error } = await db.from('coupons').update(payload).eq('id', editId);
+    if (error) { showToast('שגיאה: ' + error.message, '❌'); return; }
+  } else {
+    const { error } = await db.from('coupons').insert({ ...payload, active: true });
+    if (error) { showToast('שגיאה: ' + error.message, '❌'); return; }
+  }
+
+  closeCouponForm();
+  showToast('קופון נשמר ✓', '✓');
+  await renderCoupons();
+}
+
+async function toggleCouponActive(id, active) {
+  const { error } = await db.from('coupons').update({ active }).eq('id', id);
+  if (error) { showToast('שגיאה: ' + error.message, '❌'); await renderCoupons(); }
+}
+
+async function deleteCoupon(id) {
+  if (!confirm('למחוק קופון זה?')) return;
+  const { error } = await db.from('coupons').delete().eq('id', id);
+  if (error) { showToast('שגיאה: ' + error.message, '❌'); return; }
+  showToast('קופון נמחק', '○');
+  await renderCoupons();
+}
+
+async function sendCouponEmails(couponId) {
+  const { data: coupon } = await db.from('coupons').select('*').eq('id', couponId).single();
+  if (!coupon?.allowed_user_ids?.length) return;
+
+  if (!confirm(`לשלוח את קוד הקופון "${coupon.code}" ל-${coupon.allowed_user_ids.length} משתמשים?`)) return;
+
+  const { data: customers } = await db.from('customers')
+    .select('email, first_name')
+    .in('id', coupon.allowed_user_ids);
+
+  if (!customers?.length) { showToast('לא נמצאו משתמשים', '⚠️'); return; }
+
+  const recipients = customers.map(c => ({ to: c.email, firstName: c.first_name }));
+
+  try {
+    const res = await fetch('https://dooshi.co.il/.netlify/functions/send-coupon-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ recipients, coupon }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    showToast(`נשלח ל-${recipients.length} משתמשים ✓`, '✓');
+  } catch (e) {
+    console.error('Failed to send coupon emails:', e);
+    showToast('שגיאה בשליחת המיילים', '❌');
+  }
 }

@@ -8,6 +8,8 @@ let calendarMonth      = null;
 let selectedPickupDate = '';
 let editingOrderId     = null;
 let editingOrderData   = null;
+let appliedCoupon      = null;
+let appliedDiscount    = 0;
 
 // =============================================
 // טעינת תאריכי איסוף
@@ -172,7 +174,7 @@ function leaveOrderForm() {
 // =============================================
 function renderOrderSummary() {
   const items = Object.entries(cart).filter(([, qty]) => qty > 0);
-  const total = items.reduce((sum, [id, qty]) => {
+  const subtotal = items.reduce((sum, [id, qty]) => {
     const p = products.find(p => p.id == id);
     return sum + (p ? p.price * qty : 0);
   }, 0);
@@ -183,7 +185,117 @@ function renderOrderSummary() {
     return `<div class="order-line"><span>${p.emoji} ${p.name} × ${qty}</span><span>₪${p.price * qty}</span></div>`;
   }).join('');
 
-  document.getElementById('orderSummaryTotal').textContent = '₪' + total;
+  const discountLine = document.getElementById('orderDiscountLine');
+  if (appliedCoupon && appliedDiscount > 0) {
+    discountLine.style.display = '';
+    document.getElementById('orderDiscountLabel').textContent = `קופון ${appliedCoupon.code}`;
+    document.getElementById('orderDiscountAmount').textContent = `-₪${appliedDiscount}`;
+  } else {
+    discountLine.style.display = 'none';
+  }
+
+  document.getElementById('orderSummaryTotal').textContent = '₪' + Math.max(0, subtotal - appliedDiscount);
+}
+
+function revalidateCoupon() {
+  if (!appliedCoupon) return;
+
+  const items    = Object.entries(cart).filter(([, qty]) => qty > 0);
+  const subtotal = items.reduce((sum, [id, qty]) => {
+    const p = products.find(p => p.id == id);
+    return sum + (p ? p.price * qty : 0);
+  }, 0);
+
+  const msgEl = document.getElementById('couponMsg');
+
+  if (subtotal < appliedCoupon.min_order_amount) {
+    appliedDiscount = 0;
+    if (msgEl) {
+      msgEl.textContent = `סכום ההזמנה נמוך מהמינימום הנדרש (₪${appliedCoupon.min_order_amount}) — הקופון לא יחול`;
+      msgEl.style.color = 'var(--rose)';
+    }
+  } else {
+    let discount = appliedCoupon.type === 'fixed'
+      ? Math.min(appliedCoupon.value, subtotal)
+      : subtotal * (appliedCoupon.value / 100);
+    if (appliedCoupon.type === 'percentage' && appliedCoupon.max_discount) {
+      discount = Math.min(discount, appliedCoupon.max_discount);
+    }
+    appliedDiscount = Math.round(discount * 100) / 100;
+    if (msgEl) {
+      msgEl.textContent = `קופון הוחל! חיסכון: ₪${appliedDiscount}`;
+      msgEl.style.color = 'var(--sage)';
+    }
+  }
+
+  renderOrderSummary();
+}
+
+async function applyCoupon() {
+  const code = document.getElementById('fCouponCode').value.trim().toUpperCase();
+  const msgEl = document.getElementById('couponMsg');
+
+  const showMsg = (text, color) => { msgEl.textContent = text; msgEl.style.color = color; };
+
+  if (!code) { showMsg('נא להזין קוד קופון', 'var(--rose)'); return; }
+
+  const items    = Object.entries(cart).filter(([, qty]) => qty > 0);
+  const subtotal = items.reduce((sum, [id, qty]) => {
+    const p = products.find(p => p.id == id);
+    return sum + (p ? p.price * qty : 0);
+  }, 0);
+
+  const { data: coupon } = await db.from('coupons')
+    .select('*').eq('code', code).eq('active', true).single();
+
+  if (!coupon) { showMsg('קוד קופון לא תקין', 'var(--rose)'); return; }
+
+  if (coupon.expires_at && new Date(coupon.expires_at + 'T23:59:59') < new Date()) {
+    showMsg('קוד קופון פג תוקף', 'var(--rose)'); return;
+  }
+
+  if (coupon.allowed_user_ids && !coupon.allowed_user_ids.includes(currentUser.id)) {
+    showMsg('קוד קופון אינו תקף עבורך', 'var(--rose)'); return;
+  }
+
+  if (subtotal < coupon.min_order_amount) {
+    showMsg(`מינימום הזמנה ₪${coupon.min_order_amount} לשימוש בקופון`, 'var(--rose)'); return;
+  }
+
+  const { count } = await db.from('coupon_usages')
+    .select('*', { count: 'exact', head: true })
+    .eq('coupon_id', coupon.id)
+    .eq('customer_id', currentUser.id);
+
+  if (count >= coupon.max_usages_per_user) {
+    showMsg('הגעת למגבלת השימוש בקופון זה', 'var(--rose)'); return;
+  }
+
+  let discount = coupon.type === 'fixed'
+    ? Math.min(coupon.value, subtotal)
+    : subtotal * (coupon.value / 100);
+  if (coupon.type === 'percentage' && coupon.max_discount) {
+    discount = Math.min(discount, coupon.max_discount);
+  }
+  discount = Math.round(discount * 100) / 100;
+
+  appliedCoupon   = coupon;
+  appliedDiscount = discount;
+
+  document.getElementById('fCouponCode').disabled = true;
+  document.getElementById('couponRemoveBtn').style.display = '';
+  showMsg(`קופון הוחל! חיסכון: ₪${discount}`, 'var(--sage)');
+  renderOrderSummary();
+}
+
+function removeCoupon() {
+  appliedCoupon   = null;
+  appliedDiscount = 0;
+  document.getElementById('fCouponCode').value    = '';
+  document.getElementById('fCouponCode').disabled = false;
+  document.getElementById('couponRemoveBtn').style.display = 'none';
+  document.getElementById('couponMsg').textContent = '';
+  renderOrderSummary();
 }
 
 // =============================================
@@ -218,18 +330,21 @@ async function submitOrder() {
     .filter(([, qty]) => qty > 0)
     .map(([id, qty]) => ({ id: parseInt(id), qty, product: products.find(p => p.id == id) }));
 
-  const total = items.reduce((sum, i) => sum + i.product.price * i.qty, 0);
-  const ts    = new Date().toLocaleString('he-IL');
+  const subtotal = items.reduce((sum, i) => sum + i.product.price * i.qty, 0);
+  const total    = Math.max(0, subtotal - appliedDiscount);
+  const ts       = new Date().toLocaleString('he-IL');
 
   const orderPayload = {
-    name:        fullName,
+    name:            fullName,
     phone,
     payment,
-    items:       items.map(i => ({ qty: i.qty, product: { name: i.product.name, emoji: i.product.emoji, price: i.product.price } })),
+    items:           items.map(i => ({ qty: i.qty, product: { name: i.product.name, emoji: i.product.emoji, price: i.product.price } })),
     total,
-    notes:       notes || null,
-    pickup_date: pickupDate,
-    pickup_time: pickupTime,
+    notes:           notes || null,
+    pickup_date:     pickupDate,
+    pickup_time:     pickupTime,
+    coupon_id:       appliedCoupon?.id ?? null,
+    discount_amount: appliedDiscount || 0,
   };
 
   // =============================================
@@ -262,6 +377,14 @@ async function submitOrder() {
   if (error) { console.error('Supabase error:', error); showToast('שגיאה בשמירת ההזמנה, נסה שוב', '❌'); return; }
 
   const orderId = inserted.id;
+
+  if (appliedCoupon && currentUser) {
+    await db.from('coupon_usages').insert({
+      coupon_id:   appliedCoupon.id,
+      customer_id: currentUser.id,
+      order_id:    orderId,
+    });
+  }
   orders.unshift({ id: orderId, name: fullName, phone, payment, notes, items, total, status: 'new', ts, pickup_date: pickupDate, pickup_time: pickupTime, smsApproved: false, smsReady: false });
 
   const formData = new FormData();
@@ -280,8 +403,17 @@ async function submitOrder() {
 }
 
 function resetOrderForm() {
+  appliedCoupon   = null;
+  appliedDiscount = 0;
+  const couponCode = document.getElementById('fCouponCode');
+  if (couponCode) { couponCode.value = ''; couponCode.disabled = false; }
+  const couponMsg = document.getElementById('couponMsg');
+  if (couponMsg) couponMsg.textContent = '';
+  const removeBtn = document.getElementById('couponRemoveBtn');
+  if (removeBtn) removeBtn.style.display = 'none';
   cart = {};
   updateCartUI();
+  products.forEach(p => syncCardFooter(p.id));
   ['fName', 'fLast', 'fPhone', 'fNotes'].forEach(id => { document.getElementById(id).value = ''; });
   document.getElementById('fPayment').value = 'cash';
   document.getElementById('fPickupDate').value = '';

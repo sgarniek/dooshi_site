@@ -124,8 +124,8 @@ function switchAuthTab(tab) {
   document.querySelectorAll('.auth-tab-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.tab === tab);
   });
+  document.getElementById('authForgotSuccess').style.display = 'none';
   if (tab === 'forgot') {
-    document.getElementById('authForgotSuccess').style.display = 'none';
     document.getElementById('authForgotPanel').style.display = '';
   }
   clearAuthMessages();

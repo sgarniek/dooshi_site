@@ -155,6 +155,7 @@
       <button class="admin-tab" onclick="switchAdminTab('pricing', this)">מוצרים</button>
       <button class="admin-tab" onclick="switchAdminTab('products', this)">מלאי</button>
       <button class="admin-tab" onclick="switchAdminTab('pickup', this)">איסוף</button>
+      <button class="admin-tab" onclick="switchAdminTab('coupons', this)">קופונים</button>
     </div>
     <div class="admin-tab-content active" id="atab-orders">
       <div class="admin-order-tabs">
@@ -365,6 +366,84 @@
       <!-- רשימת תאריכים קיימים -->
       <div id="pickupSlotsList" style="margin-top:2rem"></div>
     </div>
+
+  <div class="admin-tab-content" id="atab-coupons">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem;">
+      <button class="btn btn-primary btn-sm" onclick="openCouponForm()">+ קופון חדש</button>
+    </div>
+
+    <!-- טופס יצירה/עריכה -->
+    <div id="couponFormPanel" style="display:none; margin-bottom:1.75rem;">
+      <div style="background:var(--warm-white); border:1px solid var(--gold-border); border-radius:var(--radius); padding:1.5rem; max-width:540px;">
+        <h4 id="couponFormTitle" style="margin-bottom:1.25rem; color:var(--navy);">קופון חדש</h4>
+
+        <div class="form-group">
+          <label>קוד קופון</label>
+          <input type="text" id="cfCode" placeholder="SUMMER20" style="text-transform:uppercase;" />
+        </div>
+
+        <div class="form-group">
+          <label>סוג הנחה</label>
+          <div style="display:flex; gap:8px;">
+            <div class="pickup-opt selected" id="cfTypeFixed" onclick="setCouponType('fixed')">₪ סכום קבוע</div>
+            <div class="pickup-opt" id="cfTypePercent" onclick="setCouponType('percentage')">% אחוז</div>
+          </div>
+          <input type="hidden" id="cfType" value="fixed" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label id="cfValueLabel">סכום הנחה (₪)</label>
+            <input type="number" id="cfValue" min="0" placeholder="0" />
+          </div>
+          <div class="form-group" id="cfMaxDiscountGroup" style="display:none;">
+            <label>תקרת הנחה (₪, אופציונלי)</label>
+            <input type="number" id="cfMaxDiscount" min="0" placeholder="ללא הגבלה" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>מינימום הזמנה (₪)</label>
+            <input type="number" id="cfMinOrder" min="0" placeholder="0" value="0" />
+          </div>
+          <div class="form-group">
+            <label>מקסימום שימושים למשתמש</label>
+            <input type="number" id="cfMaxUsages" min="1" placeholder="1" value="1" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>משתמשים מורשים</label>
+          <div style="display:flex; gap:8px; margin-bottom:8px;">
+            <div class="pickup-opt selected" id="cfUsersAll" onclick="setCouponUsers('all')">כל המשתמשים</div>
+            <div class="pickup-opt" id="cfUsersSpecific" onclick="setCouponUsers('specific')">משתמשים ספציפיים</div>
+          </div>
+          <input type="hidden" id="cfUsersType" value="all" />
+          <div id="cfUsersEmailsGroup" style="display:none;">
+            <textarea id="cfUsersEmails" rows="3" placeholder="מייל אחד בכל שורה" style="width:100%; box-sizing:border-box; padding:8px; font-family:monospace; font-size:0.85rem; border:1px solid var(--border); border-radius:var(--radius);"></textarea>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">הזינו כתובת מייל אחת בכל שורה</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>תאריך תפוגה (אופציונלי)</label>
+          <input type="date" id="cfExpiresAt" />
+        </div>
+
+        <input type="hidden" id="cfEditId" value="" />
+
+        <div style="display:flex; gap:8px; margin-top:0.5rem;">
+          <button class="btn btn-primary" onclick="saveCoupon()">שמור</button>
+          <button class="btn btn-ghost" onclick="closeCouponForm()">ביטול</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- רשימת קופונים -->
+    <div id="couponsList"></div>
+  </div>
 
   <!-- WhatsApp Confirm Modal -->
   <div class="modal-overlay" id="waConfirmModal">
