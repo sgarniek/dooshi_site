@@ -782,7 +782,7 @@ function renderAdminProducts() {
     <div class="product-admin-card ${product.active ? '' : 'product-admin-inactive'}">
       <div class="product-admin-img">
         ${product.image
-          ? `<img src="../${product.image}" alt="${product.name}" />`
+          ? `<img src="https://dooshi.co.il/${product.image}" alt="${product.name}" />`
           : `<span class="product-admin-emoji">${product.emoji}</span>`}
       </div>
       <div class="product-admin-info">
