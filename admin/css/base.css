@@ -124,7 +124,7 @@ nav {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: url('../../images/cookie-logo.png') center/cover no-repeat;
+  background: url('../images/cookie-logo.png') center/cover no-repeat;
   display: inline-block;
   flex-shrink: 0;
   vertical-align: middle;
