@@ -34,7 +34,7 @@ exports.handler = async (event) => {
 
   if (!settings?.length) return { statusCode: 200, headers: CORS_HEADERS, body: 'No subscribers' };
 
-  const adminIds = settings.map(s => `id=eq.${s.admin_id}`).join(',');
+  const adminIds = settings.map(s => `id.eq.${s.admin_id}`).join(',');
   const admins   = await supabaseGet(`admins?or=(${adminIds})&select=email,first_name`);
 
   if (!admins?.length) return { statusCode: 200, headers: CORS_HEADERS, body: 'No admins found' };
