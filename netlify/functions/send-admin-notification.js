@@ -50,15 +50,35 @@ exports.handler = async (event) => {
     };
     const subject = subjects[eventType] || `התראה — Dooshi`;
 
+    const itemsHtml = data.items?.length ? `
+        <table style="width:100%; border-collapse:collapse; margin:12px 0; font-size:0.88rem;">
+          <thead>
+            <tr style="border-bottom:1px solid #e2d8c8;">
+              <th style="text-align:right; padding:4px 0; color:#7A6A50;">פריט</th>
+              <th style="text-align:center; padding:4px 0; color:#7A6A50;">כמות</th>
+              <th style="text-align:left; padding:4px 0; color:#7A6A50;">מחיר</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.items.map(i => `
+            <tr style="border-bottom:1px solid #f0ebe2;">
+              <td style="padding:5px 0;">${i.emoji} ${i.name}</td>
+              <td style="text-align:center; padding:5px 0;">×${i.qty}</td>
+              <td style="text-align:left; padding:5px 0;">₪${i.price * i.qty}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>` : '';
+
     const orderDetails = data.orderId ? `
-        <ul style="line-height:2;">
+        <ul style="line-height:2; margin-bottom:8px;">
           <li><strong>מספר הזמנה:</strong> #${data.orderId}</li>
           <li><strong>שם:</strong> ${data.name}</li>
           <li><strong>טלפון:</strong> ${data.phone}</li>
-          <li><strong>סכום:</strong> ₪${data.total}</li>
           <li><strong>תשלום:</strong> ${data.payment === 'cash' ? 'מזומן' : 'Bit'}</li>
           <li><strong>איסוף:</strong> ${data.pickupDate || '—'}</li>
-        </ul>` : '';
+        </ul>
+        ${itemsHtml}
+        <p style="font-weight:700; font-size:0.95rem; color:#0C1428;">סה"כ: ₪${data.total}</p>` : '';
 
     const bodies = {
       new_order:       `<p>התקבלה הזמנה חדשה:</p>${orderDetails}`,

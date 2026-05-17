@@ -466,7 +466,7 @@ function _renderHistoryTab() {
 // =============================================
 async function cancelOrder(orderId) {
   if (!confirm('לבטל את ההזמנה?')) return;
-  const { data: order } = await db.from('orders').select('name, phone, total, payment, pickup_date').eq('id', orderId).single();
+  const { data: order } = await db.from('orders').select('name, phone, total, payment, pickup_date, items').eq('id', orderId).single();
   const { error } = await db.from('orders').update({ status: 'cancelled' }).eq('id', orderId);
   if (error) { showToast('שגיאה בביטול ההזמנה', '❌'); return; }
   showToast('ההזמנה בוטלה', '✓');
@@ -476,7 +476,7 @@ async function cancelOrder(orderId) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       eventType: 'order_cancelled',
-      data: { orderId, name: order?.name, phone: order?.phone, total: order?.total, payment: order?.payment, pickupDate: order?.pickup_date },
+      data: { orderId, name: order?.name, phone: order?.phone, total: order?.total, payment: order?.payment, pickupDate: order?.pickup_date, items: order?.items?.map(i => ({ name: i.product.name, emoji: i.product.emoji, qty: i.qty, price: i.product.price })) },
     }),
   }).catch(() => {});
 

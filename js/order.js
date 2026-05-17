@@ -366,7 +366,7 @@ async function submitOrder() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         eventType: 'order_modified',
-        data: { orderId: updatedOrderId, name: fullName, phone, total, payment, pickupDate },
+        data: { orderId: updatedOrderId, name: fullName, phone, total, payment, pickupDate, items: items.map(i => ({ name: i.product.name, emoji: i.product.emoji, qty: i.qty, price: i.product.price })) },
       }),
     }).catch(() => {});
 
@@ -402,7 +402,7 @@ async function submitOrder() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       eventType: 'new_order',
-      data: { orderId, name: fullName, phone, total, payment, pickupDate },
+      data: { orderId, name: fullName, phone, total, payment, pickupDate, items: items.map(i => ({ name: i.product.name, emoji: i.product.emoji, qty: i.qty, price: i.product.price })) },
     }),
   }).catch(() => {});
   orders.unshift({ id: orderId, name: fullName, phone, payment, notes, items, total, status: 'new', ts, pickup_date: pickupDate, pickup_time: pickupTime, smsApproved: false, smsReady: false });
