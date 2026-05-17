@@ -385,6 +385,15 @@ async function submitOrder() {
       order_id:    orderId,
     });
   }
+
+  fetch('/.netlify/functions/send-admin-notification', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      eventType: 'new_order',
+      data: { orderId, name: fullName, phone, total, payment, pickupDate },
+    }),
+  }).catch(() => {});
   orders.unshift({ id: orderId, name: fullName, phone, payment, notes, items, total, status: 'new', ts, pickup_date: pickupDate, pickup_time: pickupTime, smsApproved: false, smsReady: false });
 
   const formData = new FormData();

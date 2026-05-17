@@ -146,7 +146,7 @@
         <h2>🍪 לוח ניהול — Dooshi</h2>
         <div style="font-size:0.82rem; color:var(--text-muted); margin-top:2px;">ניהול הזמנות ומוצרים</div>
       </div>
-      <a href="https://dooshi.co.il" class="btn btn-ghost btn-sm">← חנות</a>
+      <a href="https://dooshi.co.il" class="btn btn-ghost btn-sm">מעבר לחנות</a>
     </div>
     <div class="admin-stats" id="adminStats"></div>
     <div class="admin-tabs">
@@ -156,6 +156,7 @@
       <button class="admin-tab" onclick="switchAdminTab('products', this)">מלאי</button>
       <button class="admin-tab" onclick="switchAdminTab('pickup', this)">איסוף</button>
       <button class="admin-tab" onclick="switchAdminTab('coupons', this)">קופונים</button>
+      <button class="admin-tab" onclick="switchAdminTab('notifications', this)">התראות</button>
     </div>
     <div class="admin-tab-content active" id="atab-orders">
       <div class="admin-order-tabs">
@@ -452,6 +453,40 @@
     <div id="couponsList"></div>
   </div>
 
+  <div class="admin-tab-content" id="atab-notifications">
+    <div style="max-width:480px;">
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.5rem;">
+        התראות ישלחו לכתובת המייל שלך: <strong id="notifAdminEmail"></strong>
+      </p>
+
+      <div style="display:flex; flex-direction:column; gap:1rem;">
+
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:1rem 1.25rem; background:var(--warm-white); border:1px solid var(--gold-border); border-radius:var(--radius);">
+          <div>
+            <div style="font-weight:600; font-size:0.9rem; color:var(--navy); margin-bottom:2px;">הזמנה חדשה</div>
+            <div style="font-size:0.78rem; color:var(--text-muted);">קבל התראה בכל פעם שמתקבלת הזמנה חדשה</div>
+          </div>
+          <label class="notif-toggle">
+            <input type="checkbox" id="notifNewOrder" onchange="saveNotificationSetting('new_order', this.checked)" />
+            <span class="notif-slider"></span>
+          </label>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:1rem 1.25rem; background:var(--warm-white); border:1px solid var(--gold-border); border-radius:var(--radius);">
+          <div>
+            <div style="font-weight:600; font-size:0.9rem; color:var(--navy); margin-bottom:2px;">לקוח חדש נרשם</div>
+            <div style="font-size:0.78rem; color:var(--text-muted);">קבל התראה בכל פעם שלקוח חדש נרשם למערכת</div>
+          </div>
+          <label class="notif-toggle">
+            <input type="checkbox" id="notifNewCustomer" onchange="saveNotificationSetting('new_customer', this.checked)" />
+            <span class="notif-slider"></span>
+          </label>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <!-- WhatsApp Confirm Modal -->
   <div class="modal-overlay" id="waConfirmModal">
     <div class="modal" style="max-width:360px">
@@ -559,7 +594,7 @@
       btn.disabled = true;
 
       const { data, error } = await db.from('admins')
-        .select('password_hash, salt')
+        .select('id, email, password_hash, salt')
         .eq('email', email)
         .single();
 
@@ -579,6 +614,8 @@
         return;
       }
 
+      sessionStorage.setItem('adminId', data.id);
+      sessionStorage.setItem('adminEmail', email);
       showAdmin();
     }
 

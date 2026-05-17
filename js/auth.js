@@ -249,6 +249,16 @@ async function doAuthRegister() {
   if (error) { showAuthMsg(msgEl, 'שגיאה: ' + error.message, 'error'); return; }
 
   setUser({ id: data.id, email: data.email, first_name: data.first_name, last_name: data.last_name, phone: data.phone, address_line1: data.address_line1, address_apt: data.address_apt, address_city: data.address_city, address_zip: data.address_zip });
+
+  fetch('/.netlify/functions/send-admin-notification', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      eventType: 'new_customer',
+      data: { firstName, lastName, email, phone },
+    }),
+  }).catch(() => {});
+
   closeAuthModal();
   showToast(`ברוך הבא, ${firstName}! 🎉`, '✓');
 }

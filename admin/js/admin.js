@@ -454,9 +454,10 @@ function switchAdminTab(tabName, clickedBtn) {
   clickedBtn.classList.add('active');
   document.querySelectorAll('.admin-tab-content').forEach(content => content.classList.remove('active'));
   document.getElementById('atab-' + tabName).classList.add('active');
-  if (tabName === 'pickup')    renderPickupSlots();
-  if (tabName === 'customers') renderCustomerView();
-  if (tabName === 'coupons')   renderCoupons();
+  if (tabName === 'pickup')        renderPickupSlots();
+  if (tabName === 'customers')     renderCustomerView();
+  if (tabName === 'coupons')       renderCoupons();
+  if (tabName === 'notifications') renderNotifications();
 }
 
 // =============================================
@@ -1239,5 +1240,43 @@ async function sendCouponEmails(couponId) {
   } catch (e) {
     console.error('Failed to send coupon emails:', e);
     showToast('שגיאה בשליחת המיילים', '❌');
+  }
+}
+
+// =============================================
+// התראות
+// =============================================
+
+async function renderNotifications() {
+  const adminId    = sessionStorage.getItem('adminId');
+  const adminEmail = sessionStorage.getItem('adminEmail');
+
+  document.getElementById('notifAdminEmail').textContent = adminEmail || '';
+
+  if (!adminId) return;
+
+  const { data } = await db.from('admin_notification_settings')
+    .select('event_type, enabled')
+    .eq('admin_id', adminId);
+
+  const settings = {};
+  (data || []).forEach(r => { settings[r.event_type] = r.enabled; });
+
+  document.getElementById('notifNewOrder').checked    = settings['new_order']    || false;
+  document.getElementById('notifNewCustomer').checked = settings['new_customer'] || false;
+}
+
+async function saveNotificationSetting(eventType, enabled) {
+  const adminId = sessionStorage.getItem('adminId');
+  if (!adminId) return;
+
+  const { error } = await db.from('admin_notification_settings')
+    .upsert({ admin_id: adminId, event_type: eventType, enabled }, { onConflict: 'admin_id,event_type' });
+
+  if (error) {
+    showToast('שגיאה בשמירת ההגדרה', '❌');
+    await renderNotifications();
+  } else {
+    showToast(enabled ? 'התראה הופעלה' : 'התראה כובתה', '✓');
   }
 }
