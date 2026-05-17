@@ -42,13 +42,15 @@ exports.handler = async (event) => {
   const adminUrl = 'https://admin.dooshi.co.il';
 
   const emails = admins.map(admin => {
-    const subject = eventType === 'new_order'
-      ? `הזמנה חדשה #${data.orderId} — Dooshi`
-      : `לקוח חדש נרשם — Dooshi`;
+    const subjects = {
+      new_order:       `הזמנה חדשה #${data.orderId} — Dooshi`,
+      new_customer:    `לקוח חדש נרשם — Dooshi`,
+      order_modified:  `הזמנה #${data.orderId} עודכנה — Dooshi`,
+      order_cancelled: `הזמנה #${data.orderId} בוטלה — Dooshi`,
+    };
+    const subject = subjects[eventType] || `התראה — Dooshi`;
 
-    const body = eventType === 'new_order'
-      ? `
-        <p>התקבלה הזמנה חדשה:</p>
+    const orderDetails = data.orderId ? `
         <ul style="line-height:2;">
           <li><strong>מספר הזמנה:</strong> #${data.orderId}</li>
           <li><strong>שם:</strong> ${data.name}</li>
@@ -56,17 +58,18 @@ exports.handler = async (event) => {
           <li><strong>סכום:</strong> ₪${data.total}</li>
           <li><strong>תשלום:</strong> ${data.payment === 'cash' ? 'מזומן' : 'Bit'}</li>
           <li><strong>איסוף:</strong> ${data.pickupDate || '—'}</li>
-        </ul>`
-      : `
-        <p>לקוח חדש נרשם למערכת:</p>
-        <ul style="line-height:2;">
-          <li><strong>שם:</strong> ${data.firstName} ${data.lastName}</li>
-          <li><strong>מייל:</strong> ${data.email}</li>
-          <li><strong>טלפון:</strong> ${data.phone}</li>
-        </ul>`;
+        </ul>` : '';
 
-    const linkLabel = eventType === 'new_order' ? 'לצפייה בהזמנות' : 'לצפייה בלקוחות';
-    const linkUrl   = eventType === 'new_order' ? adminUrl : `${adminUrl}?tab=customers`;
+    const bodies = {
+      new_order:       `<p>התקבלה הזמנה חדשה:</p>${orderDetails}`,
+      new_customer:    `<p>לקוח חדש נרשם למערכת:</p><ul style="line-height:2;"><li><strong>שם:</strong> ${data.firstName} ${data.lastName}</li><li><strong>מייל:</strong> ${data.email}</li><li><strong>טלפון:</strong> ${data.phone}</li></ul>`,
+      order_modified:  `<p>לקוח עדכן הזמנה קיימת:</p>${orderDetails}`,
+      order_cancelled: `<p>לקוח ביטל הזמנה:</p>${orderDetails}`,
+    };
+    const body = bodies[eventType] || '';
+
+    const linkLabel = eventType === 'new_customer' ? 'לצפייה בלקוחות' : 'לצפייה בהזמנות';
+    const linkUrl   = eventType === 'new_customer' ? `${adminUrl}?tab=customers` : adminUrl;
 
     return {
       from:    'Dooshi <noreply@dooshi.co.il>',

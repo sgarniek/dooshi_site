@@ -483,6 +483,28 @@
           </label>
         </div>
 
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:1rem 1.25rem; background:var(--warm-white); border:1px solid var(--gold-border); border-radius:var(--radius);">
+          <div>
+            <div style="font-weight:600; font-size:0.9rem; color:var(--navy); margin-bottom:2px;">הזמנה עודכנה</div>
+            <div style="font-size:0.78rem; color:var(--text-muted);">קבל התראה בכל פעם שלקוח משנה הזמנה קיימת</div>
+          </div>
+          <label class="notif-toggle">
+            <input type="checkbox" id="notifOrderModified" onchange="saveNotificationSetting('order_modified', this.checked)" />
+            <span class="notif-slider"></span>
+          </label>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:1rem 1.25rem; background:var(--warm-white); border:1px solid var(--gold-border); border-radius:var(--radius);">
+          <div>
+            <div style="font-weight:600; font-size:0.9rem; color:var(--navy); margin-bottom:2px;">הזמנה בוטלה</div>
+            <div style="font-size:0.78rem; color:var(--text-muted);">קבל התראה בכל פעם שלקוח מבטל הזמנה</div>
+          </div>
+          <label class="notif-toggle">
+            <input type="checkbox" id="notifOrderCancelled" onchange="saveNotificationSetting('order_cancelled', this.checked)" />
+            <span class="notif-slider"></span>
+          </label>
+        </div>
+
       </div>
     </div>
   </div>

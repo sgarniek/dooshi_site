@@ -359,6 +359,16 @@ async function submitOrder() {
     updateCartUI();
     resetOrderForm();
     showToast('ההזמנה עודכנה בהצלחה ✓', '✅');
+
+    fetch('/.netlify/functions/send-admin-notification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        eventType: 'order_modified',
+        data: { orderId: editingOrderId, name: fullName, phone, total, payment, pickupDate },
+      }),
+    }).catch(() => {});
+
     await renderOrderHistory();
     showView('history');
     return;

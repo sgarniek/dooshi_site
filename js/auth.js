@@ -460,9 +460,20 @@ function _renderHistoryTab() {
 // =============================================
 async function cancelOrder(orderId) {
   if (!confirm('לבטל את ההזמנה?')) return;
+  const { data: order } = await db.from('orders').select('name, phone, total, payment, pickup_date').eq('id', orderId).single();
   const { error } = await db.from('orders').update({ status: 'cancelled' }).eq('id', orderId);
   if (error) { showToast('שגיאה בביטול ההזמנה', '❌'); return; }
   showToast('ההזמנה בוטלה', '✓');
+
+  fetch('/.netlify/functions/send-admin-notification', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      eventType: 'order_cancelled',
+      data: { orderId, name: order?.name, phone: order?.phone, total: order?.total, payment: order?.payment, pickupDate: order?.pickup_date },
+    }),
+  }).catch(() => {});
+
   await renderOrderHistory();
 }
 

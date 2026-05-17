@@ -1262,8 +1262,10 @@ async function renderNotifications() {
   const settings = {};
   (data || []).forEach(r => { settings[r.event_type] = r.enabled; });
 
-  document.getElementById('notifNewOrder').checked    = settings['new_order']    || false;
-  document.getElementById('notifNewCustomer').checked = settings['new_customer'] || false;
+  document.getElementById('notifNewOrder').checked       = settings['new_order']       || false;
+  document.getElementById('notifNewCustomer').checked    = settings['new_customer']    || false;
+  document.getElementById('notifOrderModified').checked  = settings['order_modified']  || false;
+  document.getElementById('notifOrderCancelled').checked = settings['order_cancelled'] || false;
 }
 
 async function saveNotificationSetting(eventType, enabled) {
