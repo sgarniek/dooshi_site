@@ -351,7 +351,8 @@ async function submitOrder() {
   // עדכון הזמנה קיימת
   // =============================================
   if (editingOrderId) {
-    const { error } = await db.from('orders').update(orderPayload).eq('id', editingOrderId);
+    const updatedOrderId = editingOrderId;
+    const { error } = await db.from('orders').update(orderPayload).eq('id', updatedOrderId);
     if (error) { console.error('Supabase error:', error); showToast('שגיאה בעדכון ההזמנה, נסה שוב', '❌'); return; }
 
     clearEditMode();
@@ -365,7 +366,7 @@ async function submitOrder() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         eventType: 'order_modified',
-        data: { orderId: editingOrderId, name: fullName, phone, total, payment, pickupDate },
+        data: { orderId: updatedOrderId, name: fullName, phone, total, payment, pickupDate },
       }),
     }).catch(() => {});
 
