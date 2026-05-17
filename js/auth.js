@@ -451,6 +451,9 @@ function _renderHistoryTab() {
       <div class="history-actions">
         <button class="history-action-btn history-edit-btn"   onclick="editOrder(${o.id})">עריכת הזמנה</button>
         <button class="history-action-btn history-cancel-btn" onclick="cancelOrder(${o.id})">ביטול הזמנה</button>
+      </div>` : !['done', 'cancelled'].includes(o.status) ? `
+      <div style="font-size:0.78rem; color:var(--text-muted); margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid var(--gold-border); text-align:center;">
+        ⚠️ ההזמנה אושרה ולא ניתן לערוך או לבטל אותה. לשינויים צרו קשר ישירות.
       </div>` : ''}
     </div>`).join('');
 }

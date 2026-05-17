@@ -414,7 +414,8 @@ async function submitOrder() {
   formData.append('items',   items.map(i => `${i.product.name} ×${i.qty}`).join(', '));
   formData.append('total',   '₪' + total);
   formData.append('notes',   notes || '—');
-  fetch('/', { method: 'POST', body: formData }).catch(() => {});
+  const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  if (!isLocal) fetch('/', { method: 'POST', body: formData }).catch(() => {});
 
   resetOrderForm();
   document.getElementById('successOrderNum').textContent = '#' + orderId;

@@ -449,15 +449,15 @@ function confirmWhatsApp() {
 // =============================================
 // טאבים
 // =============================================
-function switchAdminTab(tabName, clickedBtn) {
-  document.querySelectorAll('.admin-tab').forEach(btn => btn.classList.remove('active'));
+function switchAdminSection(sectionName, clickedBtn) {
+  document.querySelectorAll('.admin-nav-item').forEach(btn => btn.classList.remove('active'));
   clickedBtn.classList.add('active');
-  document.querySelectorAll('.admin-tab-content').forEach(content => content.classList.remove('active'));
-  document.getElementById('atab-' + tabName).classList.add('active');
-  if (tabName === 'pickup')        renderPickupSlots();
-  if (tabName === 'customers')     renderCustomerView();
-  if (tabName === 'coupons')       renderCoupons();
-  if (tabName === 'notifications') renderNotifications();
+  document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('asec-' + sectionName).classList.add('active');
+  if (sectionName === 'pickup')        renderPickupSlots();
+  if (sectionName === 'customers')     renderCustomerView();
+  if (sectionName === 'coupons')       renderCoupons();
+  if (sectionName === 'notifications') renderNotifications();
 }
 
 // =============================================

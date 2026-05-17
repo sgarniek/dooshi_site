@@ -140,25 +140,51 @@
   </div>
 
   <!-- לוח הניהול -->
-  <div class="admin-view" id="adminContent" style="display:none">
-    <div class="admin-header">
-      <div>
-        <h2>🍪 לוח ניהול — Dooshi</h2>
-        <div style="font-size:0.82rem; color:var(--text-muted); margin-top:2px;">ניהול הזמנות ומוצרים</div>
+  <div class="admin-layout" id="adminContent" style="display:none">
+
+    <!-- כותרת עליונה -->
+    <div class="admin-top-bar">
+      <div class="admin-top-bar-logo">
+        <div class="admin-top-bar-name">
+          D<span class="logo-oo">
+            <span class="logo-cookie"></span>
+            <span class="logo-cookie"></span>
+          </span>shi
+        </div>
+        <div class="admin-top-bar-tagline">Admin Panel</div>
       </div>
-      <a href="https://dooshi.co.il" class="btn btn-ghost btn-sm">מעבר לחנות</a>
+      <div class="admin-top-bar-actions">
+        <a href="https://dooshi.co.il" class="btn btn-ghost btn-sm">מעבר לחנות</a>
+        <button class="btn btn-ghost btn-sm" onclick="doLogout()">התנתק</button>
+      </div>
     </div>
-    <div class="admin-stats" id="adminStats"></div>
-    <div class="admin-tabs">
-      <button class="admin-tab active" onclick="switchAdminTab('orders', this)">הזמנות</button>
-      <button class="admin-tab" onclick="switchAdminTab('customers', this)">לקוחות</button>
-      <button class="admin-tab" onclick="switchAdminTab('pricing', this)">מוצרים</button>
-      <button class="admin-tab" onclick="switchAdminTab('products', this)">מלאי</button>
-      <button class="admin-tab" onclick="switchAdminTab('pickup', this)">איסוף</button>
-      <button class="admin-tab" onclick="switchAdminTab('coupons', this)">קופונים</button>
-      <button class="admin-tab" onclick="switchAdminTab('notifications', this)">התראות</button>
-    </div>
-    <div class="admin-tab-content active" id="atab-orders">
+
+    <div class="admin-body">
+
+    <!-- סרגל צד -->
+    <aside class="admin-sidebar">
+      <nav class="admin-nav">
+        <button class="admin-nav-item active" onclick="switchAdminSection('dashboard', this)"><span class="nav-icon">📊</span> לוח בקרה</button>
+        <button class="admin-nav-item" onclick="switchAdminSection('orders', this)"><span class="nav-icon">📋</span> הזמנות</button>
+        <button class="admin-nav-item" onclick="switchAdminSection('customers', this)"><span class="nav-icon">👥</span> לקוחות</button>
+        <button class="admin-nav-item" onclick="switchAdminSection('pricing', this)"><span class="nav-icon">🏷️</span> מוצרים</button>
+        <button class="admin-nav-item" onclick="switchAdminSection('products', this)"><span class="nav-icon">📦</span> מלאי</button>
+        <button class="admin-nav-item" onclick="switchAdminSection('pickup', this)"><span class="nav-icon">📅</span> איסוף</button>
+        <button class="admin-nav-item" onclick="switchAdminSection('coupons', this)"><span class="nav-icon">🎫</span> קופונים</button>
+        <button class="admin-nav-item" onclick="switchAdminSection('notifications', this)"><span class="nav-icon">🔔</span> התראות</button>
+      </nav>
+    </aside>
+
+    <!-- תוכן ראשי -->
+    <main class="admin-main">
+
+      <!-- לוח בקרה -->
+      <div class="admin-section active" id="asec-dashboard">
+        <div class="admin-stats" id="adminStats"></div>
+      </div>
+
+      <!-- הזמנות -->
+      <div class="admin-section" id="asec-orders">
       <div class="admin-order-tabs">
         <button class="admin-order-tab active" data-tab="active"    onclick="switchAdminOrderTab('active', this)">פעילות</button>
         <button class="admin-order-tab"        data-tab="completed" onclick="switchAdminOrderTab('completed', this)">הושלמו</button>
@@ -181,21 +207,22 @@
         </div>
       </div>
     </div>
-    <div class="admin-tab-content" id="atab-products">
-      <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem">
-        השבתת מוצר תמנע ממנו להופיע בחנות
+      <!-- מלאי -->
+      <div class="admin-section" id="asec-products">
+        <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem">
+          השבתת מוצר תמנע ממנו להופיע בחנות
+        </div>
+        <div class="products-admin-grid" id="adminProductsGrid"></div>
       </div>
-      <div class="products-admin-grid" id="adminProductsGrid"></div>
-    </div>
 
-    <div class="admin-tab-content" id="atab-pricing">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; gap:1rem;">
-        <div style="font-size:0.85rem; color:var(--text-muted)">שינוי מחיר ישתקף מיד בחנות</div>
-        <button class="btn btn-primary btn-sm" onclick="openNewProductModal()">+ הוסף מוצר</button>
+      <!-- מוצרים / תמחור -->
+      <div class="admin-section" id="asec-pricing">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; gap:1rem;">
+          <div style="font-size:0.85rem; color:var(--text-muted)">שינוי מחיר ישתקף מיד בחנות</div>
+          <button class="btn btn-primary btn-sm" onclick="openNewProductModal()">+ הוסף מוצר</button>
+        </div>
+        <div id="pricingGrid"></div>
       </div>
-      <div id="pricingGrid"></div>
-    </div>
-  </div>
 
   <!-- New Product Modal -->
   <div class="modal-overlay" id="newProductModal">
@@ -271,7 +298,8 @@
     </div>
   </div>
 
-    <div class="admin-tab-content" id="atab-customers">
+      <!-- לקוחות -->
+      <div class="admin-section" id="asec-customers">
       <div class="cust-filter-card">
         <div class="cust-filter-row">
 
@@ -316,9 +344,10 @@
         </div>
       </div>
       <div id="customerResults"></div>
-    </div>
+      </div>
 
-    <div class="admin-tab-content" id="atab-pickup">
+      <!-- איסוף -->
+      <div class="admin-section" id="asec-pickup">
 
       <!-- שורת כותרת -->
       <div style="display:flex; align-items:center; justify-content:flex-end; margin-bottom:1.25rem;">
@@ -373,9 +402,10 @@
       </div>
 
       <div id="pickupSlotsList"></div>
-    </div>
+      </div>
 
-  <div class="admin-tab-content" id="atab-coupons">
+      <!-- קופונים -->
+      <div class="admin-section" id="asec-coupons">
 
     <div style="display:flex; align-items:center; justify-content:flex-end; margin-bottom:1.25rem;">
       <button class="btn btn-primary btn-sm" onclick="openCouponForm()">+ קופון חדש</button>
@@ -453,7 +483,8 @@
     <div id="couponsList"></div>
   </div>
 
-  <div class="admin-tab-content" id="atab-notifications">
+      <!-- התראות -->
+      <div class="admin-section" id="asec-notifications">
     <div style="max-width:480px;">
       <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.5rem;">
         התראות ישלחו לכתובת המייל שלך: <strong id="notifAdminEmail"></strong>
@@ -506,8 +537,11 @@
         </div>
 
       </div>
-    </div>
-  </div>
+      </div><!-- asec-notifications -->
+
+    </main>
+    </div><!-- admin-body -->
+  </div><!-- admin-layout -->
 
   <!-- WhatsApp Confirm Modal -->
   <div class="modal-overlay" id="waConfirmModal">
@@ -593,7 +627,7 @@
     function showAdmin() {
       sessionStorage.setItem('adminAuth', '1');
       document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('adminContent').style.display = '';
+      document.getElementById('adminContent').style.display = 'flex';
       renderAdmin();
       startInactivityWatch();
     }
