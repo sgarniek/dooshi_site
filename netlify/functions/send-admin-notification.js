@@ -39,6 +39,15 @@ exports.handler = async (event) => {
 
   if (!admins?.length) return { statusCode: 200, headers: CORS_HEADERS, body: 'No admins found' };
 
+  // Build emoji map from product table for correct icons
+  const productRows = await supabaseGet('product?select=name,emoji,type,is_bundle');
+  const emojiMap = {};
+  (productRows || []).forEach(p => {
+    if (!p.name) return;
+    const emoji = p.is_bundle ? '🎁' : (p.emoji && p.emoji !== '🍪' ? p.emoji : (p.type === 'muffin' ? '🧁' : '🍪'));
+    emojiMap[p.name] = emoji;
+  });
+
   const adminUrl = 'https://admin.dooshi.co.il';
 
   const emails = admins.map(admin => {
@@ -62,7 +71,7 @@ exports.handler = async (event) => {
           <tbody>
             ${data.items.map(i => `
             <tr style="border-bottom:1px solid #f0ebe2;">
-              <td style="padding:5px 0;">${i.emoji} ${i.name}</td>
+              <td style="padding:5px 0;">${emojiMap[i.name] || i.emoji} ${i.name}</td>
               <td style="text-align:center; padding:5px 0;">×${i.qty}</td>
               <td style="text-align:left; padding:5px 0;">₪${i.price * i.qty}</td>
             </tr>`).join('')}
@@ -84,7 +93,11 @@ exports.handler = async (event) => {
       new_order:       `<p>התקבלה הזמנה חדשה:</p>${orderDetails}`,
       new_customer:    `<p>לקוח חדש נרשם למערכת:</p><ul style="line-height:2;"><li><strong>שם:</strong> ${data.firstName} ${data.lastName}</li><li><strong>מייל:</strong> ${data.email}</li><li><strong>טלפון:</strong> ${data.phone}</li></ul>`,
       order_modified:  `<p>לקוח עדכן הזמנה קיימת:</p>${orderDetails}`,
-      order_cancelled: `<p>לקוח ביטל הזמנה:</p>${orderDetails}`,
+      order_cancelled: `
+        <div style="background:#FEF2F2; border:2px solid #DC2626; border-radius:4px; padding:12px 16px; margin-bottom:16px; text-align:center;">
+          <span style="color:#DC2626; font-weight:700; font-size:1.1rem;">❌ הזמנה בוטלה</span>
+        </div>
+        <p>לקוח ביטל את ההזמנה הבאה:</p>${orderDetails}`,
     };
     const body = bodies[eventType] || '';
 

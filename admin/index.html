@@ -628,7 +628,13 @@
       sessionStorage.setItem('adminAuth', '1');
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('adminContent').style.display = 'flex';
-      renderAdmin();
+      renderAdmin().then(() => {
+        const tab = new URLSearchParams(location.search).get('tab');
+        if (tab) {
+          const btn = document.querySelector(`.admin-nav-item[onclick*="'${tab}'"]`);
+          if (btn) switchAdminSection(tab, btn);
+        }
+      });
       startInactivityWatch();
     }
 

@@ -17,9 +17,9 @@
           name:      row.name        || '',
           desc:      row.description || '',
           price:     row.price       || 0,
-          emoji:     row.emoji       || '🍪',
           type:      row.type        || 'cookie',
           is_bundle: row.is_bundle   ?? false,
+          emoji:     row.is_bundle ? '🎁' : (row.emoji && row.emoji !== '🍪' ? row.emoji : (row.type === 'muffin' ? '🧁' : '🍪')),
           active:    row.active      ?? true,
           image:     row.image_url   || null,
         });

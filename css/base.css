@@ -109,6 +109,7 @@ nav {
   color: var(--warm-white);
   letter-spacing: 2px;
   line-height: 1;
+  text-align: center;
 }
 
 .logo-oo {

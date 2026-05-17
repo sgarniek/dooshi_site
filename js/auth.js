@@ -172,7 +172,7 @@ async function doAuthLogin() {
 
   setUser({ id: data.id, email: data.email, first_name: data.first_name, last_name: data.last_name, phone: data.phone });
   closeAuthModal();
-  showToast(`ברוך הבא, ${data.first_name}! 👋`, '✓');
+  showToast(`ברוך הבא, ${data.first_name}! 👋`, '');
 }
 
 // =============================================
@@ -260,7 +260,7 @@ async function doAuthRegister() {
   }).catch(() => {});
 
   closeAuthModal();
-  showToast(`ברוך הבא, ${firstName}! 🎉`, '✓');
+  showToast(`ברוך הבא, ${firstName}! 🎉`, '');
 }
 
 // =============================================
