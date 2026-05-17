@@ -235,7 +235,7 @@ function renderOrdersTable() {
       <!-- רשימת פריטים -->
       <td>
         <div class="order-items-list">
-          ${order.items.map(item => `${item.product.emoji} ${item.product.name} ×${item.qty}`).join('<br>')}
+          ${order.items.map(item => { const match = products.find(prod => prod.name === item.product.name); return `${match?.emoji || item.product.emoji} ${item.product.name} ×${item.qty}`; }).join('<br>')}
         </div>
       </td>
 
@@ -556,7 +556,7 @@ function _buildOrdersTable(filtered) {
              <div class="pickup-time-badge pickup-time-${o.pickup_time}">${TIME_LABELS[o.pickup_time] || ''}</div>
            </div>`
         : '<span style="color:var(--text-muted);font-size:0.8rem">—</span>'}</td>
-      <td><div class="order-items-list">${o.items.map(i => `${i.product.emoji} ${i.product.name} ×${i.qty}`).join('<br>')}</div></td>
+      <td><div class="order-items-list">${o.items.map(i => { const match = products.find(prod => prod.name === i.product.name); return `${match?.emoji || i.product.emoji} ${i.product.name} ×${i.qty}`; }).join('<br>')}</div></td>
       <td><strong>₪${o.total}</strong></td>
       <td>${o.payment === 'cash' ? '💵 מזומן' : '📱 Bit'}</td>
       <td><span class="status-badge ${STATUS_CLASSES[o.status] || ''}">${STATUS_LABELS[o.status] || o.status}</span></td>

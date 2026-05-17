@@ -425,15 +425,18 @@ function _renderHistoryTab() {
         <div class="history-total">₪${o.total}</div>
       </div>
       <div class="history-items">
-        ${o.items.map(i => `
+        ${o.items.map(i => {
+          const match = products.find(prod => prod.name === i.product.name);
+          const emoji = match?.emoji || i.product.emoji;
+          return `
           <div class="history-item">
-            <span>${i.product.emoji} ${i.product.name}</span>
+            <span>${emoji} ${i.product.name}</span>
             <span class="history-item-right">
               <span class="history-item-qty">× ${i.qty}</span>
               <span class="history-item-price">₪${i.product.price * i.qty}</span>
             </span>
-          </div>
-        `).join('')}
+          </div>`;
+        }).join('')}
       </div>
       ${o.pickup_date && o.status !== 'cancelled' ? `
       <div class="history-pickup">
