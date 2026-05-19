@@ -90,6 +90,7 @@ function toggleUserDropdown() {
   dropdown.className = 'user-dropdown';
   dropdown.innerHTML = `
     <button class="user-dropdown-item" onclick="showView('history'); document.getElementById('userDropdown')?.remove()">ההזמנות שלי</button>
+    <button class="user-dropdown-item" onclick="renderUserPromotions(); showView('promotions'); document.getElementById('userDropdown')?.remove()">המבצעים שלי</button>
     <button class="user-dropdown-item user-dropdown-logout" onclick="doLogout()">התנתק</button>
   `;
   btn.parentElement.style.position = 'relative';
@@ -338,6 +339,74 @@ async function doAuthForgot() {
 // =============================================
 // יציאה
 // =============================================
+async function renderUserPromotions() {
+  const container = document.getElementById('promotionsList');
+  container.innerHTML = '<div class="history-loading">טוען מבצעים...</div>';
+
+  if (!currentUser) { showView('shop'); return; }
+
+  const today = new Date().toISOString().split('T')[0];
+
+  const { data: coupons } = await db.from('coupons')
+    .select('*')
+    .eq('active', true)
+    .or(`expires_at.is.null,expires_at.gte.${today}`);
+
+  if (!coupons?.length) {
+    container.innerHTML = '<div class="history-empty">אין מבצעים זמינים כרגע</div>';
+    return;
+  }
+
+  const eligible = coupons.filter(c =>
+    !c.allowed_user_ids || c.allowed_user_ids.includes(currentUser.id)
+  );
+
+  if (!eligible.length) {
+    container.innerHTML = '<div class="history-empty">אין מבצעים זמינים עבורך כרגע</div>';
+    return;
+  }
+
+  const { data: usages } = await db.from('coupon_usages')
+    .select('coupon_id')
+    .eq('customer_id', currentUser.id);
+
+  const usageCount = {};
+  (usages || []).forEach(u => {
+    usageCount[u.coupon_id] = (usageCount[u.coupon_id] || 0) + 1;
+  });
+
+  const available = eligible.filter(c => (usageCount[c.id] || 0) < c.max_usages_per_user);
+
+  if (!available.length) {
+    container.innerHTML = '<div class="history-empty">השתמשת בכל המבצעים הזמינים</div>';
+    return;
+  }
+
+  container.innerHTML = available.map(c => {
+    const discountLabel = c.type === 'fixed'
+      ? `₪${c.value} הנחה`
+      : `${c.value}% הנחה${c.max_discount ? ` (עד ₪${c.max_discount})` : ''}`;
+    const expiryText = c.expires_at
+      ? `תקף עד ${new Date(c.expires_at + 'T00:00:00').toLocaleDateString('he-IL')}`
+      : 'ללא תאריך תפוגה';
+    const minText = c.min_order_amount > 0 ? `מינימום הזמנה ₪${c.min_order_amount}` : '';
+    const usesLeft = c.max_usages_per_user - (usageCount[c.id] || 0);
+
+    return `
+      <div class="history-card" style="margin-bottom:1rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+          <div style="font-family:'Cormorant Garamond',serif; font-size:1.5rem; letter-spacing:3px; color:var(--navy); font-weight:700;">${c.code}</div>
+          <div style="font-size:1.1rem; font-weight:700; color:var(--gold);">${discountLabel}</div>
+        </div>
+        <div style="font-size:0.8rem; color:var(--text-muted); display:flex; flex-wrap:wrap; gap:12px;">
+          <span>⏰ ${expiryText}</span>
+          ${minText ? `<span>🛒 ${minText}</span>` : ''}
+          <span>✓ ${usesLeft === 1 ? 'שימוש אחד נותר' : `${usesLeft} שימושים נותרים`}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
 function doLogout() {
   clearSession();
   currentUser = null;

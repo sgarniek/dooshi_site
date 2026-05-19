@@ -258,6 +258,10 @@ async function applyCoupon() {
     showMsg('קוד קופון אינו תקף עבורך', 'var(--rose)'); return;
   }
 
+  if (coupon.allowed_emails && !coupon.allowed_emails.includes(currentUser.email)) {
+    showMsg('קוד קופון אינו תקף עבור כתובת המייל שלך', 'var(--rose)'); return;
+  }
+
   if (subtotal < coupon.min_order_amount) {
     showMsg(`מינימום הזמנה ₪${coupon.min_order_amount} לשימוש בקופון`, 'var(--rose)'); return;
   }

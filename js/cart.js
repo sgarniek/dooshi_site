@@ -120,6 +120,12 @@ async function goToOrder() {
   renderOrderSummary();
   await loadPickupSlots();
 
+  if (currentUser && !editingOrderId) {
+    if (!document.getElementById('fName').value)  document.getElementById('fName').value  = currentUser.first_name || '';
+    if (!document.getElementById('fLast').value)  document.getElementById('fLast').value  = currentUser.last_name  || '';
+    if (!document.getElementById('fPhone').value) document.getElementById('fPhone').value = currentUser.phone      || '';
+  }
+
   if (editingOrderId && editingOrderData) {
     // Edit mode: update title and pre-fill saved details
     document.getElementById('orderFormTitle').textContent    = `עדכון הזמנה #${editingOrderId}`;

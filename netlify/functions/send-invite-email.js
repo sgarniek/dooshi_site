@@ -12,24 +12,25 @@ exports.handler = async (event) => {
     return { statusCode: 405, headers: CORS_HEADERS, body: 'Method Not Allowed' };
   }
 
-  const { emails, coupon } = JSON.parse(event.body || '{}');
-  if (!emails?.length || !coupon) {
+  const { invites } = JSON.parse(event.body || '{}');
+  if (!invites?.length) {
     return { statusCode: 400, headers: CORS_HEADERS, body: 'Missing required fields' };
   }
 
-  const discountLabel = coupon.type === 'fixed'
-    ? `₪${coupon.value} הנחה`
-    : `${coupon.value}% הנחה${coupon.max_discount ? ` (עד ₪${coupon.max_discount})` : ''}`;
+  const messages = invites.map(({ email: to, coupon }) => {
+    const discountLabel = coupon.type === 'fixed'
+      ? `₪${coupon.value} הנחה`
+      : `${coupon.value}% הנחה${coupon.max_discount ? ` (עד ₪${coupon.max_discount})` : ''}`;
 
-  const expiryLine = coupon.expires_at
-    ? `<p style="font-size:0.85rem; color:#B45309; margin-bottom:16px;">⏰ הקופון תקף עד: <strong>${new Date(coupon.expires_at + 'T00:00:00').toLocaleDateString('he-IL')}</strong></p>`
-    : '';
+    const expiryLine = coupon.expires_at
+      ? `<p style="font-size:0.85rem; color:#B45309; margin-bottom:16px;">⏰ הקופון תקף עד: <strong>${new Date(coupon.expires_at + 'T00:00:00').toLocaleDateString('he-IL')}</strong></p>`
+      : '';
 
-  const minOrderLine = coupon.min_order_amount > 0
-    ? `<p style="font-size:0.82rem; color:#7A6A50; margin-bottom:16px;">מינימום הזמנה: ₪${coupon.min_order_amount}</p>`
-    : '';
+    const minOrderLine = coupon.min_order_amount > 0
+      ? `<p style="font-size:0.82rem; color:#7A6A50; margin-bottom:16px;">מינימום הזמנה: ₪${coupon.min_order_amount}</p>`
+      : '';
 
-  const messages = emails.map(to => ({
+    return ({
     from:    'Dooshi <noreply@dooshi.co.il>',
     to:      [to],
     subject: 'הזמנה מיוחדת עם קופון — Dooshi',
@@ -70,7 +71,8 @@ exports.handler = async (event) => {
           Dooshi — Homemade in Tel Aviv
         </div>
       </div>`,
-  }));
+    });
+  });
 
   const res = await fetch('https://api.resend.com/emails/batch', {
     method: 'POST',
