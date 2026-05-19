@@ -1362,29 +1362,25 @@ async function sendInvites() {
   const emails = emailsRaw.split('\n').map(e => e.trim().toLowerCase()).filter(Boolean);
   if (!emails.length) { showToast('לא נמצאו כתובות מייל תקינות', '⚠️'); return; }
 
-  // Create one unique coupon per invitee
-  const invites = [];
-  for (const email of emails) {
-    const suffix  = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const uniqueCode = `${code}-${suffix}`;
+  // Create one coupon with all invitee emails
+  const { data: coupon, error } = await db.from('coupons').insert({
+    code,
+    type, value,
+    max_discount:        maxDisc,
+    min_order_amount:    minOrder,
+    max_usages_per_user: 1,
+    expires_at:          expiresAt,
+    active:              true,
+    allowed_emails:      emails,
+  }).select('*').single();
 
-    const { data: coupon, error } = await db.from('coupons').insert({
-      code:                uniqueCode,
-      type, value,
-      max_discount:        maxDisc,
-      min_order_amount:    minOrder,
-      max_usages_per_user: 1,
-      expires_at:          expiresAt,
-      active:              true,
-      allowed_emails:      [email],
-    }).select('*').single();
-
-    if (error) {
-      showToast(`שגיאה ביצירת קופון עבור ${email}: ${error.message}`, '❌');
-      return;
-    }
-    invites.push({ email, coupon });
+  if (error) {
+    const isDuplicate = error.code === '23505' || error.message?.toLowerCase().includes('unique') || error.message?.toLowerCase().includes('duplicate');
+    showToast(isDuplicate ? `קוד הקופון "${code}" כבר קיים — בחר קוד אחר` : 'שגיאה ביצירת הקופון: ' + error.message, '❌');
+    return;
   }
+
+  const invites = emails.map(email => ({ email, coupon }));
 
   try {
     const res = await fetch('https://dooshi.co.il/.netlify/functions/send-invite-email', {
