@@ -455,7 +455,7 @@ function switchAdminSection(sectionName, clickedBtn) {
   document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
   document.getElementById('asec-' + sectionName).classList.add('active');
   if (sectionName === 'pickup')        renderPickupSlots();
-  if (sectionName === 'customers')     renderCustomerView();
+  if (sectionName === 'customers')     { renderCustomerView(); renderAllCustomers(); }
   if (sectionName === 'coupons')       renderCoupons();
   if (sectionName === 'notifications') renderNotifications();
 }
@@ -463,6 +463,49 @@ function switchAdminSection(sectionName, clickedBtn) {
 // =============================================
 // לקוחות — חיפוש ותצוגה
 // =============================================
+
+function switchCustomerTab(tab, btn) {
+  document.querySelectorAll('.admin-cust-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('custTabOrders').style.display = tab === 'orders' ? '' : 'none';
+  document.getElementById('custTabAll').style.display    = tab === 'all'    ? '' : 'none';
+}
+
+async function renderAllCustomers() {
+  const el = document.getElementById('allCustomersList');
+  if (!el) return;
+  el.innerHTML = '<div style="color:var(--text-muted); font-size:0.9rem;">טוען...</div>';
+
+  const { data, error } = await db.from('customers')
+    .select('id, first_name, last_name, email, phone, created_at')
+    .order('created_at', { ascending: false });
+
+  if (error || !data?.length) {
+    el.innerHTML = '<div style="color:var(--text-muted); font-size:0.9rem; padding:1rem 0;">אין לקוחות רשומים</div>';
+    return;
+  }
+
+  el.innerHTML = `
+    <table class="pickup-table" style="width:100%;">
+      <thead>
+        <tr>
+          <th>שם</th>
+          <th>מייל</th>
+          <th>טלפון</th>
+          <th>תאריך הרשמה</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.map(c => `
+          <tr>
+            <td>${c.first_name} ${c.last_name}</td>
+            <td dir="ltr" style="font-size:0.85rem;">${c.email}</td>
+            <td dir="ltr">${c.phone || '—'}</td>
+            <td>${c.created_at ? new Date(c.created_at).toLocaleDateString('he-IL') : '—'}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
 
 function clearCustomerSearch() {
   ['custFirst', 'custLast', 'custPhone', 'custFromDate', 'custToDate']
@@ -1051,6 +1094,7 @@ async function renderCoupons() {
   const coupons = couponsRes.data || [];
   const usages  = usagesRes.data || [];
 
+
   if (!coupons.length) {
     listEl.innerHTML = '<div style="color:var(--text-muted); font-size:0.9rem; padding:1rem 0;">אין קופונים מוגדרים</div>';
     return;
@@ -1280,5 +1324,76 @@ async function saveNotificationSetting(eventType, enabled) {
     await renderNotifications();
   } else {
     showToast(enabled ? 'התראה הופעלה' : 'התראה כובתה', '✓');
+  }
+}
+
+// =============================================
+// הזמנת משתמשים
+// =============================================
+
+function switchPromoTab(tab, btn) {
+  document.querySelectorAll('.admin-promo-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('promoTabCoupons').style.display = tab === 'coupons' ? '' : 'none';
+  document.getElementById('promoTabInvite').style.display  = tab === 'invite'  ? '' : 'none';
+}
+
+function setInviteType(type) {
+  document.getElementById('inviteType').value = type;
+  document.getElementById('inviteTypeFixed').classList.toggle('selected', type === 'fixed');
+  document.getElementById('inviteTypePercent').classList.toggle('selected', type === 'percentage');
+  document.getElementById('inviteValueLabel').textContent = type === 'fixed' ? 'סכום הנחה (₪)' : 'אחוז הנחה (%)';
+  document.getElementById('inviteMaxDiscountGroup').style.display = type === 'percentage' ? '' : 'none';
+}
+
+async function sendInvites() {
+  const emailsRaw  = document.getElementById('inviteEmails').value.trim();
+  const code       = document.getElementById('inviteCode').value.trim().toUpperCase();
+  const type       = document.getElementById('inviteType').value;
+  const value      = parseFloat(document.getElementById('inviteValue').value);
+  const maxDisc    = parseFloat(document.getElementById('inviteMaxDiscount').value) || null;
+  const minOrder   = parseFloat(document.getElementById('inviteMinOrder').value) || 0;
+  const expiresAt  = document.getElementById('inviteExpiry').value || null;
+
+  if (!emailsRaw)        { showToast('נא להזין כתובות מייל', '⚠️'); return; }
+  if (!code)             { showToast('נא להזין קוד קופון', '⚠️'); return; }
+  if (isNaN(value) || value <= 0) { showToast('נא להזין ערך הנחה', '⚠️'); return; }
+
+  const emails = emailsRaw.split('\n').map(e => e.trim().toLowerCase()).filter(Boolean);
+  if (!emails.length) { showToast('לא נמצאו כתובות מייל תקינות', '⚠️'); return; }
+
+  // Create coupon in DB
+  const { data: coupon, error } = await db.from('coupons').insert({
+    code, type, value,
+    max_discount:       maxDisc,
+    min_order_amount:   minOrder,
+    max_usages_per_user: 1,
+    expires_at:         expiresAt,
+    active:             true,
+  }).select('*').single();
+
+  if (error) {
+    const isDuplicate = error.code === '23505' || error.message?.toLowerCase().includes('unique') || error.message?.toLowerCase().includes('duplicate');
+    showToast(isDuplicate ? `קוד הקופון "${code}" כבר קיים — בחר קוד אחר` : 'שגיאה ביצירת הקופון: ' + error.message, '❌');
+    return;
+  }
+
+  try {
+    const res = await fetch('https://dooshi.co.il/.netlify/functions/send-invite-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ emails, coupon }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    showToast(`הזמנות נשלחו ל-${emails.length} כתובות`, '');
+    document.getElementById('inviteEmails').value = '';
+    document.getElementById('inviteCode').value = '';
+    document.getElementById('inviteValue').value = '';
+    document.getElementById('inviteMinOrder').value = '0';
+    document.getElementById('inviteExpiry').value = '';
+    await renderCoupons();
+  } catch (e) {
+    console.error('Failed to send invites:', e);
+    showToast('שגיאה בשליחת ההזמנות', '❌');
   }
 }

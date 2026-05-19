@@ -170,7 +170,7 @@
         <button class="admin-nav-item" onclick="switchAdminSection('pricing', this)"><span class="nav-icon">🏷️</span> מוצרים</button>
         <button class="admin-nav-item" onclick="switchAdminSection('products', this)"><span class="nav-icon">📦</span> מלאי</button>
         <button class="admin-nav-item" onclick="switchAdminSection('pickup', this)"><span class="nav-icon">📅</span> איסוף</button>
-        <button class="admin-nav-item" onclick="switchAdminSection('coupons', this)"><span class="nav-icon">🎫</span> קופונים</button>
+        <button class="admin-nav-item" onclick="switchAdminSection('coupons', this)"><span class="nav-icon">🎫</span> מבצעים</button>
         <button class="admin-nav-item" onclick="switchAdminSection('notifications', this)"><span class="nav-icon">🔔</span> התראות</button>
       </nav>
     </aside>
@@ -300,7 +300,15 @@
 
       <!-- לקוחות -->
       <div class="admin-section" id="asec-customers">
-      <div class="cust-filter-card">
+
+        <div class="admin-order-tabs" style="margin-bottom:1.25rem;">
+          <button class="admin-cust-tab active" data-cust-tab="orders" onclick="switchCustomerTab('orders', this)">הזמנות לפי לקוח</button>
+          <button class="admin-cust-tab"        data-cust-tab="all"    onclick="switchCustomerTab('all', this)">כל הלקוחות</button>
+        </div>
+
+        <!-- הזמנות לפי לקוח -->
+        <div id="custTabOrders">
+        <div class="cust-filter-card">
         <div class="cust-filter-row">
 
           <div class="cust-filter-field">
@@ -344,6 +352,13 @@
         </div>
       </div>
       <div id="customerResults"></div>
+        </div><!-- custTabOrders -->
+
+        <!-- כל הלקוחות -->
+        <div id="custTabAll" style="display:none;">
+          <div id="allCustomersList"></div>
+        </div>
+
       </div>
 
       <!-- איסוף -->
@@ -407,6 +422,13 @@
       <!-- קופונים -->
       <div class="admin-section" id="asec-coupons">
 
+        <div class="admin-order-tabs" style="margin-bottom:1.25rem;">
+          <button class="admin-promo-tab active" data-promo-tab="coupons" onclick="switchPromoTab('coupons', this)">קופונים</button>
+          <button class="admin-promo-tab"        data-promo-tab="invite"  onclick="switchPromoTab('invite', this)">קמפיין הזמנות</button>
+        </div>
+
+        <!-- קופונים -->
+        <div id="promoTabCoupons">
     <div style="display:flex; align-items:center; justify-content:flex-end; margin-bottom:1.25rem;">
       <button class="btn btn-primary btn-sm" onclick="openCouponForm()">+ קופון חדש</button>
     </div>
@@ -481,7 +503,57 @@
 
     <!-- רשימת קופונים -->
     <div id="couponsList"></div>
-  </div>
+        </div><!-- promoTabCoupons -->
+
+        <!-- קמפיין הזמנות -->
+        <div id="promoTabInvite" style="display:none; max-width:540px;">
+      <h4 style="color:var(--navy); margin-bottom:1.25rem; font-size:1rem;">הזמנת משתמשים עם קופון</h4>
+
+      <div class="form-group">
+        <label>כתובות מייל (אחת בכל שורה)</label>
+        <textarea id="inviteEmails" rows="3" placeholder="email@example.com" style="width:100%; box-sizing:border-box; padding:8px; font-family:monospace; font-size:0.85rem; border:1px solid var(--border); border-radius:var(--radius); direction:ltr;"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>קוד קופון</label>
+        <input type="text" id="inviteCode" placeholder="WELCOME20" style="text-transform:uppercase;" />
+      </div>
+
+      <div class="form-group">
+        <label>סוג הנחה</label>
+        <div style="display:flex; gap:8px;">
+          <div class="pickup-opt selected" id="inviteTypeFixed" onclick="setInviteType('fixed')">₪ סכום קבוע</div>
+          <div class="pickup-opt" id="inviteTypePercent" onclick="setInviteType('percentage')">% אחוז</div>
+        </div>
+        <input type="hidden" id="inviteType" value="fixed" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label id="inviteValueLabel">סכום הנחה (₪)</label>
+          <input type="number" id="inviteValue" min="0" placeholder="0" />
+        </div>
+        <div class="form-group" id="inviteMaxDiscountGroup" style="display:none;">
+          <label>תקרת הנחה (₪)</label>
+          <input type="number" id="inviteMaxDiscount" min="0" placeholder="ללא הגבלה" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>מינימום הזמנה (₪)</label>
+          <input type="number" id="inviteMinOrder" min="0" placeholder="0" value="0" />
+        </div>
+        <div class="form-group">
+          <label>תאריך תפוגה (אופציונלי)</label>
+          <input type="date" id="inviteExpiry" />
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-sm" onclick="sendInvites()">שלח הזמנות</button>
+        </div><!-- promoTabInvite -->
+
+      </div><!-- asec-coupons -->
 
       <!-- התראות -->
       <div class="admin-section" id="asec-notifications">

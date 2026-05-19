@@ -36,6 +36,12 @@
   renderProducts();
   updateCartUI();
   initAuth();
+
+  // Auto-open register modal if ?action=register in URL
+  const action = new URLSearchParams(location.search).get('action');
+  if (action === 'register') {
+    setTimeout(() => openAuthModal('register'), 300);
+  }
 })();
 
 
