@@ -476,13 +476,14 @@
 
         <div class="form-group">
           <label>משתמשים מורשים</label>
-          <div style="display:flex; gap:8px; margin-bottom:8px;">
-            <div class="pickup-opt selected" id="cfUsersAll" onclick="setCouponUsers('all')">כל המשתמשים</div>
-            <div class="pickup-opt" id="cfUsersSpecific" onclick="setCouponUsers('specific')">משתמשים ספציפיים</div>
+          <div style="display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+            <div class="pickup-opt selected" id="cfUsersAll"      onclick="setCouponUsers('all')">כל המשתמשים</div>
+            <div class="pickup-opt"          id="cfUsersSpecific" onclick="setCouponUsers('specific')">משתמשים רשומים</div>
+            <div class="pickup-opt"          id="cfUsersEmails"   onclick="setCouponUsers('emails')">לפי מייל</div>
           </div>
           <input type="hidden" id="cfUsersType" value="all" />
           <div id="cfUsersEmailsGroup" style="display:none;">
-            <textarea id="cfUsersEmails" rows="3" placeholder="מייל אחד בכל שורה" style="width:100%; box-sizing:border-box; padding:8px; font-family:monospace; font-size:0.85rem; border:1px solid var(--border); border-radius:var(--radius);"></textarea>
+            <textarea id="cfUsersEmailsList" rows="3" placeholder="מייל אחד בכל שורה" style="width:100%; box-sizing:border-box; padding:8px; font-family:monospace; font-size:0.85rem; border:1px solid var(--border); border-radius:var(--radius);"></textarea>
             <p style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">הזינו כתובת מייל אחת בכל שורה</p>
           </div>
         </div>

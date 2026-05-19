@@ -1122,7 +1122,11 @@ async function renderCoupons() {
           const discountLabel = c.type === 'fixed'
             ? `₪${c.value}`
             : `${c.value}%${c.max_discount ? ` (עד ₪${c.max_discount})` : ''}`;
-          const usersLabel = c.allowed_user_ids ? `${c.allowed_user_ids.length} משתמשים` : 'כולם';
+          const usersLabel = c.allowed_emails?.length
+            ? `${c.allowed_emails.length} מיילים`
+            : c.allowed_user_ids?.length
+              ? `${c.allowed_user_ids.length} משתמשים`
+              : 'כולם';
           return `
             <tr style="${c.active ? '' : 'opacity:0.5;'}">
               <td><strong style="font-family:monospace; letter-spacing:1px;">${c.code}</strong></td>
@@ -1162,7 +1166,7 @@ function openCouponForm(couponId = null) {
     document.getElementById('cfExpiresAt').value = '';
     setCouponType('fixed');
     setCouponUsers('all');
-    document.getElementById('cfUsersEmails').value = '';
+    document.getElementById('cfUsersEmailsList').value = '';
     return;
   }
 
@@ -1176,11 +1180,14 @@ function openCouponForm(couponId = null) {
     document.getElementById('cfExpiresAt').value  = c.expires_at || '';
     setCouponType(c.type);
 
-    if (c.allowed_user_ids && c.allowed_user_ids.length) {
+    if (c.allowed_emails?.length) {
+      setCouponUsers('emails');
+      document.getElementById('cfUsersEmailsList').value = c.allowed_emails.join('\n');
+    } else if (c.allowed_user_ids?.length) {
       setCouponUsers('specific');
       const { data: customers } = await db.from('customers')
         .select('email').in('id', c.allowed_user_ids);
-      document.getElementById('cfUsersEmails').value = (customers || []).map(c => c.email).join('\n');
+      document.getElementById('cfUsersEmailsList').value = (customers || []).map(c => c.email).join('\n');
     } else {
       setCouponUsers('all');
     }
@@ -1201,9 +1208,10 @@ function setCouponType(type) {
 
 function setCouponUsers(mode) {
   document.getElementById('cfUsersType').value = mode;
-  document.getElementById('cfUsersAll').classList.toggle('selected', mode === 'all');
+  document.getElementById('cfUsersAll').classList.toggle('selected',      mode === 'all');
   document.getElementById('cfUsersSpecific').classList.toggle('selected', mode === 'specific');
-  document.getElementById('cfUsersEmailsGroup').style.display = mode === 'specific' ? '' : 'none';
+  document.getElementById('cfUsersEmails').classList.toggle('selected',   mode === 'emails');
+  document.getElementById('cfUsersEmailsGroup').style.display = (mode === 'specific' || mode === 'emails') ? '' : 'none';
 }
 
 async function saveCoupon() {
@@ -1221,17 +1229,23 @@ async function saveCoupon() {
   if (type === 'percentage' && value > 100) { showToast('אחוז הנחה מקסימלי הוא 100', '⚠️'); return; }
 
   let allowed_user_ids = null;
+  let allowed_emails   = null;
+
   if (usersType === 'specific') {
-    const emails = document.getElementById('cfUsersEmails').value
+    const emailList = document.getElementById('cfUsersEmailsList').value
       .split('\n').map(e => e.trim().toLowerCase()).filter(Boolean);
-    if (!emails.length) { showToast('נא להזין לפחות מייל אחד', '⚠️'); return; }
-    const { data: customers } = await db.from('customers').select('id').in('email', emails);
+    if (!emailList.length) { showToast('נא להזין לפחות מייל אחד', '⚠️'); return; }
+    const { data: customers } = await db.from('customers').select('id').in('email', emailList);
     if (!customers?.length) { showToast('לא נמצאו משתמשים עם המיילים שהוזנו', '⚠️'); return; }
     allowed_user_ids = customers.map(c => c.id);
+  } else if (usersType === 'emails') {
+    allowed_emails = document.getElementById('cfUsersEmailsList').value
+      .split('\n').map(e => e.trim().toLowerCase()).filter(Boolean);
+    if (!allowed_emails.length) { showToast('נא להזין לפחות מייל אחד', '⚠️'); return; }
   }
 
   const expiresAt = document.getElementById('cfExpiresAt').value || null;
-  const payload = { code, type, value, max_discount: maxDisc, min_order_amount: minOrder, max_usages_per_user: maxUsages, allowed_user_ids, expires_at: expiresAt };
+  const payload = { code, type, value, max_discount: maxDisc, min_order_amount: minOrder, max_usages_per_user: maxUsages, allowed_user_ids, allowed_emails, expires_at: expiresAt };
 
   if (editId) {
     const { error } = await db.from('coupons').update(payload).eq('id', editId);
